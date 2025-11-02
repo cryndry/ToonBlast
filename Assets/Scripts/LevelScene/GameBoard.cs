@@ -13,6 +13,7 @@ public class GameBoard : MonoBehaviour
     private int moveCount = 20;
 
     private float cellSize;
+    private const float maxCellSize = 1f;
     private const float cellSizePPUScaler = 100f;
     private Vector3 startPosition;
 
@@ -22,9 +23,8 @@ public class GameBoard : MonoBehaviour
     void Start()
     {
         LoadLevelData();
-        GetGridInfo(out cellSize, out startPosition);
+        GetGridInfo();
         DrawBoard();
-        Debug.Log($"Cell Size: {cellSize}, Start Position: {startPosition}");
     }
 
     void LoadLevelData()
@@ -60,17 +60,15 @@ public class GameBoard : MonoBehaviour
         }
     }
 
-    void GetGridInfo( out float cellSize, out Vector3 startPosition)
+    void GetGridInfo()
     {
         float screenHeight = Camera.main.orthographicSize * 2f;
         float screenWidth = screenHeight * Camera.main.aspect;
 
-        float gridWidth = screenWidth * 0.8f;
-        Debug.Log("Grid Width: " + gridWidth);
-        Debug.Log("Screen width: " + screenWidth);
-        Debug.Log("Screen height: " + screenHeight);
+        float suggestedCellSize = screenWidth * 0.8f / columnCount;
+        cellSize = Mathf.Min(suggestedCellSize, maxCellSize);
 
-        cellSize = gridWidth / columnCount;
+        float gridWidth = cellSize * columnCount;
         float gridHeight = cellSize * rowCount;
 
         GameObject canvas = GameObject.Find("MainCanvas");
