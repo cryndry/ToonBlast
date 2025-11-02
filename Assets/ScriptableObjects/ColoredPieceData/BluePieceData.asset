@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f93abe3e4b7cb954284759f04cdb1985, type: 3}
+  m_Name: BluePieceData
+  m_EditorClassIdentifier: Assembly-CSharp::ColoredPieceData
+  baseSprite: {fileID: -2615874204119335, guid: c235d91f3857842e4a7ae5d2594c0ef0, type: 3}
+  rocketSprite: {fileID: 8853254876290271475, guid: cf6794c819f8d481e84f642fc6206e3e, type: 3}
+  explosionSprite: {fileID: -600494540707355758, guid: f3d3b560080cd4741b65a476cca38c1a, type: 3}

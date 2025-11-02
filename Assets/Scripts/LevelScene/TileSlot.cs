@@ -4,7 +4,7 @@ public class TileSlot
 {
     public int x, y;
     public bool isUsable;
-    public Transform currentPiece; 
+    public Piece currentPiece; 
     
     public TileSlot(int x, int y, bool isUsable)
     {

@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f93abe3e4b7cb954284759f04cdb1985, type: 3}
+  m_Name: RedPieceData
+  m_EditorClassIdentifier: Assembly-CSharp::ColoredPieceData
+  baseSprite: {fileID: 8166710274925509176, guid: fb779dc4d485142fcad3bd3a6db4fa32, type: 3}
+  rocketSprite: {fileID: -4162601588504768772, guid: 5c95e218fed5b4fe3b69194a5841fbbe, type: 3}
+  explosionSprite: {fileID: 8635282560227039426, guid: c0e2e0e11e60f42c6b957a9754ecfa04, type: 3}

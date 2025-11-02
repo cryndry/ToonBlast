@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f93abe3e4b7cb954284759f04cdb1985, type: 3}
+  m_Name: YellowPieceData
+  m_EditorClassIdentifier: Assembly-CSharp::ColoredPieceData
+  baseSprite: {fileID: -8425141836431729757, guid: 5513d27fbd0724de99c196bc31dfecf6, type: 3}
+  rocketSprite: {fileID: 6090080599973395561, guid: a51a9cdc3d6ad4b73b9802cfb4bbbd2d, type: 3}
+  explosionSprite: {fileID: 6910005400417552955, guid: c272dd11d6031440688d9eb170bcb264, type: 3}
