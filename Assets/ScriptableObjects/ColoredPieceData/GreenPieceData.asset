@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f93abe3e4b7cb954284759f04cdb1985, type: 3}
   m_Name: GreenPieceData
   m_EditorClassIdentifier: Assembly-CSharp::ColoredPieceData
+  color: 1
   baseSprite: {fileID: -6099873399732076034, guid: 7ca51015335c7492283e2161d46ca215, type: 3}
   rocketSprite: {fileID: -8149426069742796037, guid: aac8ed3fe857f4d368fa8b3af161ad19, type: 3}
   explosionSprite: {fileID: 3823634399010047068, guid: 8e3ad8bcf503b4771bb11b9547fe71af, type: 3}

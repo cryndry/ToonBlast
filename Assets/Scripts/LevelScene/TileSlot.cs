@@ -2,15 +2,13 @@ using UnityEngine;
 
 public class TileSlot
 {
-    public int x, y;
+    public Vector2Int position;
     public bool isUsable;
-    public Piece currentPiece; 
-    
-    public TileSlot(int x, int y, bool isUsable)
+    public Piece currentPiece;
+
+    public TileSlot(Vector2Int position, bool isUsable)
     {
-        this.x = x;
-        this.y = y;
+        this.position = position;
         this.isUsable = isUsable;
-        this.currentPiece = null;
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,8 +16,8 @@ public class GameBoard : MonoBehaviour
 
     private float cellSize;
     private const float maxCellSize = 1f;
-    private const float slotSizePPUScaler = 100f;
-    private const float cellSizePPUScaler = 100f / 142f;
+    private const float slotSizePPUScaler = 100f / 1f; // 1f is slot sprite's size in pixels, 100f is pixels per unit
+    private const float cellSizePPUScaler = 100f / 142f; // 142f is piece sprite's size in pixels, 100f is pixels per unit
     private Vector3 startPosition;
 
     private TileSlot[,] grid;
@@ -27,6 +28,7 @@ public class GameBoard : MonoBehaviour
         LoadLevelData();
         GetGridInfo();
         DrawBoard();
+        ShowRocketHints();
     }
 
     void LoadLevelData()
@@ -52,7 +54,8 @@ public class GameBoard : MonoBehaviour
                 {
                     int index = y * columnCount + x;
                     bool isUsable = gridCellTypes[index] != "null";
-                    grid[x, y] = new TileSlot(x, y, isUsable);
+                    Vector2Int slotPosition = new Vector2Int(x, y);
+                    grid[x, y] = new TileSlot(slotPosition, isUsable);
                 }
             }
         }
@@ -64,7 +67,6 @@ public class GameBoard : MonoBehaviour
 
     void GetGridInfo()
     {
-        columnCount = 5;
         float screenHeight = Camera.main.orthographicSize * 2f;
         float screenWidth = screenHeight * Camera.main.aspect;
 
@@ -92,7 +94,6 @@ public class GameBoard : MonoBehaviour
 
     public void DrawBoard()
     {
-
         if (grid == null)
         {
             Debug.LogError("Grid data is not initialized!");
@@ -103,12 +104,13 @@ public class GameBoard : MonoBehaviour
         {
             for (int y = 0; y < rowCount; y++)
             {
-                if (grid[x, y].isUsable)
+                TileSlot slot = grid[x, y];
+                if (slot.isUsable)
                 {
                     Vector3 slotPosition = GetPositionOfTile(x, y);
-                    GameObject slot = Instantiate(slotPrefab, slotContainer);
-                    slot.transform.localPosition = slotPosition;
-                    slot.transform.localScale = cellSize * slotSizePPUScaler * Vector3.one;
+                    GameObject slotGO = Instantiate(slotPrefab, slotContainer);
+                    slotGO.transform.localPosition = slotPosition;
+                    slotGO.transform.localScale = cellSize * slotSizePPUScaler * Vector3.one;
 
                     int index = y * columnCount + x;
                     string cellType = gridCellTypes[index];
@@ -117,8 +119,8 @@ public class GameBoard : MonoBehaviour
                     pieceGO.transform.localScale = cellSize * cellSizePPUScaler * Vector3.one;
 
                     Piece piece = pieceGO.GetComponent<Piece>();
-                    piece.GridPosition = new Vector2Int(x, y);
-                    grid[x, y].currentPiece = piece;
+                    piece.GridPosition = slot.position;
+                    slot.currentPiece = piece;
                 }
             }
         }
@@ -129,5 +131,96 @@ public class GameBoard : MonoBehaviour
         float posX = startPosition.x + (x + 0.5f) * cellSize;
         float posY = startPosition.y + (y + 0.5f) * cellSize;
         return new Vector2(posX, posY);
+    }
+
+    private void ShowRocketHints()
+    {
+        for (int x = 0; x < columnCount; x++)
+        {
+            for (int y = 0; y < rowCount; y++)
+            {
+                if (grid[x, y].currentPiece is ColoredPiece coloredPiece)
+                {
+                    coloredPiece.Status = ColoredPieceStatus.Normal;
+                }
+            }
+        }
+
+        for (int x = 0; x < columnCount; x++)
+        {
+            for (int y = 0; y < rowCount; y++)
+            {
+                TileSlot slot = grid[x, y];
+                if (slot.isUsable && slot.currentPiece is ColoredPiece)
+                {
+                    List<ColoredPiece> matchingPieces = FindMatchingColoredPieces(slot);
+                    Debug.Log($"Found {matchingPieces.Count} matching pieces at ({x}, {y})");
+                    if (matchingPieces.Count >= 4)
+                    {
+                        foreach (ColoredPiece match in matchingPieces)
+                        {
+                            match.Status = ColoredPieceStatus.Rocketable;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private List<ColoredPiece> FindMatchingColoredPieces(TileSlot startSlot)
+    {
+        if (startSlot.currentPiece is not ColoredPiece startPiece) return new List<ColoredPiece>();
+
+        List<ColoredPiece> group = new List<ColoredPiece>();
+        Queue<TileSlot> queue = new Queue<TileSlot>();
+        HashSet<TileSlot> visited = new HashSet<TileSlot>();
+
+        queue.Enqueue(startSlot);
+        visited.Add(startSlot);
+
+        ColoredPieceColor targetColor = startPiece.Color;
+
+        while (queue.Count > 0)
+        {
+            TileSlot current = queue.Dequeue();
+            Piece piece = current.currentPiece;
+
+            if (piece != null && piece is ColoredPiece coloredPiece && coloredPiece.Color == targetColor)
+            {
+                group.Add(coloredPiece);
+
+                foreach (TileSlot neighbor in GetAdjacentCellPositions(current))
+                {
+                    if (!visited.Contains(neighbor))
+                    {
+                        queue.Enqueue(neighbor);
+                        visited.Add(neighbor);
+                    }
+                }
+            }
+        }
+
+        return group;
+    }
+
+    List<TileSlot> GetAdjacentCellPositions(TileSlot slot, bool includeDiagonals = false)
+    {
+        List<TileSlot> neighbors = new List<TileSlot>();
+        Vector2Int cellPosition = slot.position;
+
+        if (cellPosition.x > 0) neighbors.Add(grid[cellPosition.x - 1, cellPosition.y]);
+        if (cellPosition.x < columnCount - 1) neighbors.Add(grid[cellPosition.x + 1, cellPosition.y]);
+        if (cellPosition.y > 0) neighbors.Add(grid[cellPosition.x, cellPosition.y - 1]);
+        if (cellPosition.y < rowCount - 1) neighbors.Add(grid[cellPosition.x, cellPosition.y + 1]);
+
+        if (includeDiagonals)
+        {
+            if (cellPosition.x > 0 && cellPosition.y > 0) neighbors.Add(grid[cellPosition.x - 1, cellPosition.y - 1]);
+            if (cellPosition.x > 0 && cellPosition.y < rowCount - 1) neighbors.Add(grid[cellPosition.x - 1, cellPosition.y + 1]);
+            if (cellPosition.x < columnCount - 1 && cellPosition.y > 0) neighbors.Add(grid[cellPosition.x + 1, cellPosition.y - 1]);
+            if (cellPosition.x < columnCount - 1 && cellPosition.y < rowCount - 1) neighbors.Add(grid[cellPosition.x + 1, cellPosition.y + 1]);
+        }
+
+        return neighbors;
     }
 }

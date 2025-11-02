@@ -5,9 +5,7 @@ public class ColoredPiece : Piece
     [SerializeField] private ColoredPieceData pieceData;
     [SerializeField] private SpriteRenderer sr;
 
-
-    [SerializeField] private ColoredPieceColor _color;
-    public ColoredPieceColor Color { get; }
+    public ColoredPieceColor Color => pieceData.color;
     private ColoredPieceStatus _status = ColoredPieceStatus.Normal;
     public ColoredPieceStatus Status
     {
@@ -34,11 +32,6 @@ public class ColoredPiece : Piece
     public override void OnTap()
     {
         Debug.Log("Green Piece Tapped");
-    }
-
-    public override bool IsMatchable(Piece other)
-    {
-        return other is ColoredPiece coloredPiece && coloredPiece.Color == this.Color;
     }
 
     public void ShowRocketHint()
