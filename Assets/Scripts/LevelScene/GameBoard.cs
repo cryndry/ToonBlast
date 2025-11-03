@@ -151,10 +151,9 @@ public class GameBoard : MonoBehaviour
             for (int y = 0; y < rowCount; y++)
             {
                 TileSlot slot = grid[x, y];
-                if (slot.isUsable && slot.currentPiece is ColoredPiece)
+                if (slot.isUsable && slot.currentPiece is ColoredPiece coloredPiece && coloredPiece.Status == ColoredPieceStatus.Normal)
                 {
                     List<ColoredPiece> matchingPieces = FindMatchingColoredPieces(slot);
-                    Debug.Log($"Found {matchingPieces.Count} matching pieces at ({x}, {y})");
                     if (matchingPieces.Count >= 4)
                     {
                         foreach (ColoredPiece match in matchingPieces)
