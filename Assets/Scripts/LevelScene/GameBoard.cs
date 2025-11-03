@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class GameBoard : MonoBehaviour
 {
+    private GameBoard() { }
+    public static GameBoard Instance { get; private set; }
+
     [SerializeField] private GameObject slotPrefab;
     [SerializeField] private Transform slotContainer;
     [SerializeField] private Transform pieceContainer;
@@ -23,7 +26,17 @@ public class GameBoard : MonoBehaviour
     private TileSlot[,] grid;
     private string[] gridCellTypes;
 
-    void Start()
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
+
+    private void Start()
     {
         LoadLevelData();
         GetGridInfo();
@@ -31,7 +44,7 @@ public class GameBoard : MonoBehaviour
         ShowRocketHints();
     }
 
-    void LoadLevelData()
+    private void LoadLevelData()
     {
         level = PlayerPrefs.GetInt("CurrentLevel", 1);
         string levelFileName = $"level_{level:D2}.json";
@@ -65,7 +78,7 @@ public class GameBoard : MonoBehaviour
         }
     }
 
-    void GetGridInfo()
+    private void GetGridInfo()
     {
         float screenHeight = Camera.main.orthographicSize * 2f;
         float screenWidth = screenHeight * Camera.main.aspect;
@@ -126,7 +139,7 @@ public class GameBoard : MonoBehaviour
         }
     }
 
-    Vector2 GetPositionOfTile(int x, int y)
+    private Vector2 GetPositionOfTile(int x, int y)
     {
         float posX = startPosition.x + (x + 0.5f) * cellSize;
         float posY = startPosition.y + (y + 0.5f) * cellSize;
@@ -202,7 +215,7 @@ public class GameBoard : MonoBehaviour
         return group;
     }
 
-    List<TileSlot> GetAdjacentCellPositions(TileSlot slot, bool includeDiagonals = false)
+    private List<TileSlot> GetAdjacentCellPositions(TileSlot slot, bool includeDiagonals = false)
     {
         List<TileSlot> neighbors = new List<TileSlot>();
         Vector2Int cellPosition = slot.position;
@@ -221,5 +234,65 @@ public class GameBoard : MonoBehaviour
         }
 
         return neighbors;
+    }
+
+    private void UpdateGrid()
+    {
+        for (int x = 0; x < columnCount; x++)
+        {
+            for (int y = 0; y < rowCount; y++)
+            {
+                TileSlot slot = grid[x, y];
+                if (!slot.isUsable) continue;
+
+                Piece piece = slot.currentPiece;
+                if (piece != null) continue;
+
+                // Logic to make pieces fall into empty slots would go here
+                for (int checkY = y + 1; checkY < rowCount; checkY++)
+                {
+                    TileSlot checkSlot = grid[x, checkY];
+                    if (checkSlot.isUsable && checkSlot.currentPiece != null && checkSlot.currentPiece.IsFallable())
+                    {
+                        Piece fallingPiece = checkSlot.currentPiece;
+                        checkSlot.currentPiece = null;
+                        slot.currentPiece = fallingPiece;
+                        fallingPiece.GridPosition = slot.position;
+                        fallingPiece.transform.localPosition = GetPositionOfTile(x, y);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public void ResolveMatch(Vector2Int gridPosition)
+    {
+        TileSlot slot = grid[gridPosition.x, gridPosition.y];
+        Piece piece = slot.currentPiece;
+
+        if (piece == null) return;
+
+        if (piece is ColoredPiece)
+        {
+            List<ColoredPiece> matchingPieces = FindMatchingColoredPieces(slot);
+
+            if (matchingPieces.Count < 2) return;
+
+            foreach (ColoredPiece match in matchingPieces)
+            {
+                TileSlot matchSlot = grid[match.GridPosition.x, match.GridPosition.y];
+                match.Status = ColoredPieceStatus.Exploding;
+                matchSlot.currentPiece = null;
+            }
+
+            if (matchingPieces.Count >= 4)
+            {
+                // spawn a rocket
+            }
+        }
+
+        UpdateGrid();
+        ShowRocketHints();
     }
 }

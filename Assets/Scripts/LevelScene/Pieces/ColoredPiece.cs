@@ -25,23 +25,12 @@ public class ColoredPiece : Piece
 
     public override bool OnBreak()
     {
-        Debug.Log("Green Piece Broken");
-        return true;
+        return false;
     }
 
     public override void OnTap()
     {
-        Debug.Log("Green Piece Tapped");
-    }
-
-    public void ShowRocketHint()
-    {
-        sr.sprite = pieceData.rocketSprite;
-    }
-
-    public void HideRocketHint()
-    {
-        sr.sprite = pieceData.baseSprite;
+        GameBoard.Instance.ResolveMatch(GridPosition);
     }
 
     private void SetStatus(ColoredPieceStatus status)
@@ -55,8 +44,14 @@ public class ColoredPiece : Piece
                 sr.sprite = pieceData.rocketSprite;
                 break;
             case ColoredPieceStatus.Exploding:
-                sr.sprite = pieceData.explosionSprite;
+                Explode();
                 break;
         }
+    }
+
+    private void Explode()
+    {
+        Destroy(this.gameObject);
+        // Additional explosion effects will be added here
     }
 }

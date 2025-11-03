@@ -41,13 +41,11 @@ public class InputManager : MonoBehaviour
     {
         Vector2 mousePosition = Mouse.current.position.ReadValue();
         Vector2 mouseWorldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
-        Debug.Log("Mouse World Position: " + mouseWorldPosition);
 
         RaycastHit2D hit = Physics2D.Raycast(mouseWorldPosition, Vector2.zero);
         if (hit.collider != null)
         {
             EventManager.InvokeTap(hit.collider);
-            Debug.Log("Tapped on: " + hit.collider.gameObject.name);
         }
     }
 }
