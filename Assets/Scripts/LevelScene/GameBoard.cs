@@ -17,14 +17,14 @@ public class GameBoard : MonoBehaviour
     private int rowCount = 10;
     private int moveCount = 20;
 
-    private float cellSize;
-    private const float maxCellSize = 1f;
+    public float pieceSize;
+    private const float maxPieceSize = 1f;
     private const float slotSizePPUScaler = 100f / 1f; // 1f is slot sprite's size in pixels, 100f is pixels per unit
-    private const float cellSizePPUScaler = 100f / 142f; // 142f is piece sprite's size in pixels, 100f is pixels per unit
+    private const float pieceSizePPUScaler = 100f / 142f; // 142f is piece sprite's size in pixels, 100f is pixels per unit
     private Vector3 startPosition;
 
     private TileSlot[,] grid;
-    private string[] gridCellTypes;
+    private string[] gridPieceTypes;
 
     private void Awake()
     {
@@ -57,7 +57,7 @@ public class GameBoard : MonoBehaviour
 
             columnCount = levelData.grid_width;
             rowCount = levelData.grid_height;
-            gridCellTypes = levelData.grid.ToArray();
+            gridPieceTypes = levelData.grid.ToArray();
             moveCount = levelData.move_count;
 
             grid = new TileSlot[columnCount, rowCount];
@@ -66,7 +66,7 @@ public class GameBoard : MonoBehaviour
                 for (int y = 0; y < rowCount; y++)
                 {
                     int index = y * columnCount + x;
-                    bool isUsable = gridCellTypes[index] != "null";
+                    bool isUsable = gridPieceTypes[index] != "null";
                     Vector2Int slotPosition = new Vector2Int(x, y);
                     grid[x, y] = new TileSlot(slotPosition, isUsable);
                 }
@@ -83,11 +83,11 @@ public class GameBoard : MonoBehaviour
         float screenHeight = Camera.main.orthographicSize * 2f;
         float screenWidth = screenHeight * Camera.main.aspect;
 
-        float suggestedCellSize = screenWidth * 0.8f / columnCount;
-        cellSize = Mathf.Min(suggestedCellSize, maxCellSize);
+        float suggestedPieceSize = screenWidth * 0.8f / columnCount;
+        pieceSize = Mathf.Min(suggestedPieceSize, maxPieceSize);
 
-        float gridWidth = cellSize * columnCount;
-        float gridHeight = cellSize * rowCount;
+        float gridWidth = pieceSize * columnCount;
+        float gridHeight = pieceSize * rowCount;
 
         GameObject canvas = GameObject.Find("MainCanvas");
         CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
@@ -123,13 +123,13 @@ public class GameBoard : MonoBehaviour
                     Vector3 slotPosition = GetPositionOfTile(x, y);
                     GameObject slotGO = Instantiate(slotPrefab, slotContainer);
                     slotGO.transform.localPosition = slotPosition;
-                    slotGO.transform.localScale = cellSize * slotSizePPUScaler * Vector3.one;
+                    slotGO.transform.localScale = pieceSize * slotSizePPUScaler * Vector3.one;
 
                     int index = y * columnCount + x;
-                    string cellType = gridCellTypes[index];
-                    GameObject pieceGO = PieceGenerator.Instance.GeneratePiece(cellType, pieceContainer);
+                    string pieceType = gridPieceTypes[index];
+                    GameObject pieceGO = PieceGenerator.Instance.GeneratePiece(pieceType, pieceContainer);
                     pieceGO.transform.localPosition = slotPosition;
-                    pieceGO.transform.localScale = cellSize * cellSizePPUScaler * Vector3.one;
+                    pieceGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
 
                     Piece piece = pieceGO.GetComponent<Piece>();
                     piece.GridPosition = slot.position;
@@ -141,8 +141,8 @@ public class GameBoard : MonoBehaviour
 
     private Vector2 GetPositionOfTile(int x, int y)
     {
-        float posX = startPosition.x + (x + 0.5f) * cellSize;
-        float posY = startPosition.y + (y + 0.5f) * cellSize;
+        float posX = startPosition.x + (x + 0.5f) * pieceSize;
+        float posY = startPosition.y + (y + 0.5f) * pieceSize;
         return new Vector2(posX, posY);
     }
 
@@ -201,7 +201,7 @@ public class GameBoard : MonoBehaviour
             {
                 group.Add(coloredPiece);
 
-                foreach (TileSlot neighbor in GetAdjacentCellPositions(current))
+                foreach (TileSlot neighbor in GetAdjacentPiecePositions(current))
                 {
                     if (!visited.Contains(neighbor))
                     {
@@ -215,22 +215,22 @@ public class GameBoard : MonoBehaviour
         return group;
     }
 
-    private List<TileSlot> GetAdjacentCellPositions(TileSlot slot, bool includeDiagonals = false)
+    private List<TileSlot> GetAdjacentPiecePositions(TileSlot slot, bool includeDiagonals = false)
     {
         List<TileSlot> neighbors = new List<TileSlot>();
-        Vector2Int cellPosition = slot.position;
+        Vector2Int piecePosition = slot.position;
 
-        if (cellPosition.x > 0) neighbors.Add(grid[cellPosition.x - 1, cellPosition.y]);
-        if (cellPosition.x < columnCount - 1) neighbors.Add(grid[cellPosition.x + 1, cellPosition.y]);
-        if (cellPosition.y > 0) neighbors.Add(grid[cellPosition.x, cellPosition.y - 1]);
-        if (cellPosition.y < rowCount - 1) neighbors.Add(grid[cellPosition.x, cellPosition.y + 1]);
+        if (piecePosition.x > 0) neighbors.Add(grid[piecePosition.x - 1, piecePosition.y]);
+        if (piecePosition.x < columnCount - 1) neighbors.Add(grid[piecePosition.x + 1, piecePosition.y]);
+        if (piecePosition.y > 0) neighbors.Add(grid[piecePosition.x, piecePosition.y - 1]);
+        if (piecePosition.y < rowCount - 1) neighbors.Add(grid[piecePosition.x, piecePosition.y + 1]);
 
         if (includeDiagonals)
         {
-            if (cellPosition.x > 0 && cellPosition.y > 0) neighbors.Add(grid[cellPosition.x - 1, cellPosition.y - 1]);
-            if (cellPosition.x > 0 && cellPosition.y < rowCount - 1) neighbors.Add(grid[cellPosition.x - 1, cellPosition.y + 1]);
-            if (cellPosition.x < columnCount - 1 && cellPosition.y > 0) neighbors.Add(grid[cellPosition.x + 1, cellPosition.y - 1]);
-            if (cellPosition.x < columnCount - 1 && cellPosition.y < rowCount - 1) neighbors.Add(grid[cellPosition.x + 1, cellPosition.y + 1]);
+            if (piecePosition.x > 0 && piecePosition.y > 0) neighbors.Add(grid[piecePosition.x - 1, piecePosition.y - 1]);
+            if (piecePosition.x > 0 && piecePosition.y < rowCount - 1) neighbors.Add(grid[piecePosition.x - 1, piecePosition.y + 1]);
+            if (piecePosition.x < columnCount - 1 && piecePosition.y > 0) neighbors.Add(grid[piecePosition.x + 1, piecePosition.y - 1]);
+            if (piecePosition.x < columnCount - 1 && piecePosition.y < rowCount - 1) neighbors.Add(grid[piecePosition.x + 1, piecePosition.y + 1]);
         }
 
         return neighbors;
@@ -258,7 +258,7 @@ public class GameBoard : MonoBehaviour
                         checkSlot.currentPiece = null;
                         slot.currentPiece = fallingPiece;
                         fallingPiece.GridPosition = slot.position;
-                        fallingPiece.transform.localPosition = GetPositionOfTile(x, y);
+                        fallingPiece.MoveToPosition(GetPositionOfTile(x, y));
                         break;
                     }
                 }

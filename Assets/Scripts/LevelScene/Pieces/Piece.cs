@@ -8,10 +8,30 @@ public abstract class Piece : MonoBehaviour
     public abstract bool OnBreak();
     public virtual bool IsFallable() => true;
 
+    private float PieceSize => GameBoard.Instance.pieceSize;
+    private const float fallSpeedFactor = 3f;
+
+    private Vector3? targetPosition = null;
+
     void Start()
     {
         EventManager.OnTapEvent += HandleTap;
     }
+
+    void Update()
+    {
+        if (targetPosition != null)
+        {
+            float movement = PieceSize * fallSpeedFactor * Time.deltaTime;
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition.Value, movement);
+
+            if (transform.position == targetPosition.Value)
+            {
+                targetPosition = null;
+            }
+        }
+    }
+
     void OnDestroy()
     {
         EventManager.OnTapEvent -= HandleTap;
@@ -23,5 +43,10 @@ public abstract class Piece : MonoBehaviour
         {
             OnTap();
         }
+    }
+
+    public void MoveToPosition(Vector3 targetPosition)
+    {
+        this.targetPosition = targetPosition;
     }
 }
