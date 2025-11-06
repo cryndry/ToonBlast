@@ -25,6 +25,7 @@ public class GameBoard : MonoBehaviour
 
     private TileSlot[,] grid;
     private string[] gridPieceTypes;
+    private Queue<Piece>[] willFallQueues;
 
     private void Awake()
     {
@@ -60,9 +61,11 @@ public class GameBoard : MonoBehaviour
             gridPieceTypes = levelData.grid.ToArray();
             moveCount = levelData.move_count;
 
+            willFallQueues = new Queue<Piece>[columnCount];
             grid = new TileSlot[columnCount, rowCount];
             for (int x = 0; x < columnCount; x++)
             {
+                willFallQueues[x] = new Queue<Piece>();
                 for (int y = 0; y < rowCount; y++)
                 {
                     int index = y * columnCount + x;
@@ -256,7 +259,8 @@ public class GameBoard : MonoBehaviour
                 Piece piece = slot.currentPiece;
                 if (piece != null) continue;
 
-                // Logic to make pieces fall into empty slots would go here
+                bool foundFallingPiece = false;
+                // Logic to make pieces fall into empty slots
                 for (int checkY = y + 1; checkY < rowCount; checkY++)
                 {
                     TileSlot checkSlot = grid[x, checkY];
@@ -264,41 +268,25 @@ public class GameBoard : MonoBehaviour
                     {
                         Piece fallingPiece = checkSlot.currentPiece;
                         checkSlot.currentPiece = null;
-                        slot.currentPiece = fallingPiece;
                         fallingPiece.MoveToPosition(GetPositionOfTile(x, y));
+                        foundFallingPiece = true;
                         break;
                     }
                 }
-            }
-        }
 
-        for (int x = 0; x < columnCount; x++)
-        {
-            int emptyUsableSlots = 0;
-            for (int y = rowCount - 1; y >= 0; y--)
-            {
-                TileSlot slot = grid[x, y];
-                if (slot.isUsable)
+                if (!foundFallingPiece)
                 {
-                    if (slot.currentPiece == null)
-                    {
-                        emptyUsableSlots++;
-                    }
-                    else break;
+                    // Slot is empty and usable, need to fill it, add new piece to fall queue
+                    GameObject queuedPieceGO = PieceGenerator.Instance.GeneratePiece("rand", pieceContainer);
+                    queuedPieceGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
+
+                    Piece queuedPiece = queuedPieceGO.GetComponent<Piece>();
+                    willFallQueues[x].Enqueue(queuedPiece);
+
+                    Vector3 slotPosition = GetPositionOfTile(x, rowCount + willFallQueues[x].Count - 1);
+                    queuedPieceGO.transform.localPosition = slotPosition;
+                    queuedPiece.MoveToPosition(GetPositionOfTile(x, y));
                 }
-            }
-
-            for (int i = 0; i < emptyUsableSlots; i++)
-            {
-                Vector3 slotPosition = GetPositionOfTile(x, i + rowCount);
-
-                GameObject pieceGO = PieceGenerator.Instance.GeneratePiece("rand", pieceContainer);
-                pieceGO.transform.localPosition = slotPosition;
-                pieceGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
-
-                Piece piece = pieceGO.GetComponent<Piece>();
-                piece.GridPosition = new Vector2Int(x, i + rowCount);
-                piece.MoveToPosition(GetPositionOfTile(x, i + rowCount - emptyUsableSlots));
             }
         }
     }
@@ -318,9 +306,20 @@ public class GameBoard : MonoBehaviour
             return false;
         }
 
+        TileSlot exSlot = grid[piece.GridPosition.x, piece.GridPosition.y];
+        if (exSlot.currentPiece == piece)
+        {
+            exSlot.currentPiece = null;
+        }
+
         TileSlot slot = grid[gridPosition.x, gridPosition.y];
         slot.currentPiece = piece;
         piece.GridPosition = gridPosition;
+
+        if (willFallQueues[gridPosition.x].TryPeek(out Piece nextPiece) && nextPiece == piece)
+        {
+            willFallQueues[gridPosition.x].Dequeue();
+        }
 
         ShowRocketHints();
 
