@@ -3,7 +3,6 @@ using UnityEngine;
 public class ColoredPiece : Piece
 {
     [SerializeField] private ColoredPieceData pieceData;
-    [SerializeField] private SpriteRenderer sr;
 
     public ColoredPieceColor Color => pieceData.color;
     private ColoredPieceStatus _status = ColoredPieceStatus.Normal;

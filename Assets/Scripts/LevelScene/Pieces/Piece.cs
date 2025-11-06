@@ -3,6 +3,8 @@ using UnityEngine;
 public abstract class Piece : MonoBehaviour
 {
     public Vector2Int GridPosition { get; set; }
+    [SerializeField] protected SpriteRenderer sr;
+    [SerializeField] protected BoxCollider2D boxCollider;
 
     public abstract void OnTap();
     public abstract bool OnBreak();
@@ -15,6 +17,7 @@ public abstract class Piece : MonoBehaviour
 
     void Start()
     {
+        SetColliderSizeAndOffset();
         EventManager.OnTapEvent += HandleTap;
     }
 
@@ -54,5 +57,23 @@ public abstract class Piece : MonoBehaviour
     public void MoveToPosition(Vector3 targetPosition)
     {
         this.targetPosition = targetPosition;
+    }
+
+    private void SetColliderSizeAndOffset()
+    {
+        // 1. Set the size
+        boxCollider.size = Vector2.one * sr.sprite.bounds.size.x;
+
+        // 2. Calculate the bottom position of the sprite in local space
+        // bounds.min.y gives you the bottom edge relative to the pivot
+        float spriteBottomY = sr.sprite.bounds.min.y;
+
+        // 3. Calculate the new offset
+        // We want the bottom of the collider to be at 'spriteBottomY'
+        // So we place its center half its height above that point.
+        float newOffsetY = spriteBottomY + (boxCollider.size.y / 2f);
+
+        // 4. Apply the offset (keeping standard X alignment)
+        boxCollider.offset = new Vector2(sr.sprite.bounds.center.x, newOffsetY);
     }
 }
