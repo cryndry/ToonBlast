@@ -146,6 +146,14 @@ public class GameBoard : MonoBehaviour
         return new Vector2(posX, posY);
     }
 
+    public Vector2Int GetGridIndexFromPosition(Vector2 worldPos)
+    {
+        int x = Mathf.FloorToInt((worldPos.x - startPosition.x) / pieceSize - 0.5f);
+        int y = Mathf.FloorToInt((worldPos.y - startPosition.y) / pieceSize - 0.5f);
+
+        return new Vector2Int(x, y);
+    }
+
     private void ShowRocketHints()
     {
         for (int x = 0; x < columnCount; x++)
@@ -257,13 +265,66 @@ public class GameBoard : MonoBehaviour
                         Piece fallingPiece = checkSlot.currentPiece;
                         checkSlot.currentPiece = null;
                         slot.currentPiece = fallingPiece;
-                        fallingPiece.GridPosition = slot.position;
                         fallingPiece.MoveToPosition(GetPositionOfTile(x, y));
                         break;
                     }
                 }
             }
         }
+
+        for (int x = 0; x < columnCount; x++)
+        {
+            int emptyUsableSlots = 0;
+            for (int y = rowCount - 1; y >= 0; y--)
+            {
+                TileSlot slot = grid[x, y];
+                if (slot.isUsable)
+                {
+                    if (slot.currentPiece == null)
+                    {
+                        emptyUsableSlots++;
+                    }
+                    else break;
+                }
+            }
+
+            for (int i = 0; i < emptyUsableSlots; i++)
+            {
+                Vector3 slotPosition = GetPositionOfTile(x, i + rowCount);
+
+                GameObject pieceGO = PieceGenerator.Instance.GeneratePiece("rand", pieceContainer);
+                pieceGO.transform.localPosition = slotPosition;
+                pieceGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
+
+                Piece piece = pieceGO.GetComponent<Piece>();
+                piece.GridPosition = new Vector2Int(x, i + rowCount);
+                piece.MoveToPosition(GetPositionOfTile(x, i + rowCount - emptyUsableSlots));
+            }
+        }
+    }
+
+    public bool SetSlotPiece(Vector2Int gridPosition, Piece piece)
+    {
+        if (gridPosition.x < 0 || gridPosition.x >= columnCount ||
+            gridPosition.y < 0 || gridPosition.y >= rowCount)
+        {
+            // Debug.LogError("Grid position out of bounds: " + gridPosition);
+            return false;
+        }
+
+        if (!grid[gridPosition.x, gridPosition.y].isUsable)
+        {
+            // Debug.LogError("Trying to set piece in an unusable slot: " + gridPosition);
+            return false;
+        }
+
+        TileSlot slot = grid[gridPosition.x, gridPosition.y];
+        slot.currentPiece = piece;
+        piece.GridPosition = gridPosition;
+
+        ShowRocketHints();
+
+        return true;
     }
 
     public void ResolveMatch(Vector2Int gridPosition)

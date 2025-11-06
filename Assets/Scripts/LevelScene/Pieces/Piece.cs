@@ -25,6 +25,12 @@ public abstract class Piece : MonoBehaviour
             float movement = PieceSize * fallSpeedFactor * Time.deltaTime;
             transform.position = Vector3.MoveTowards(transform.position, targetPosition.Value, movement);
 
+            Vector2Int calculatedGridPosition = GameBoard.Instance.GetGridIndexFromPosition(transform.position);
+            if (calculatedGridPosition != GridPosition)
+            {
+                GameBoard.Instance.SetSlotPiece(calculatedGridPosition, this);
+            }
+
             if (transform.position == targetPosition.Value)
             {
                 targetPosition = null;
