@@ -7,6 +7,10 @@ public class PieceGenerator : MonoBehaviour
     [SerializeField] private GameObject BluePiecePrefab;
     [SerializeField] private GameObject YellowPiecePrefab;
     private GameObject[] coloredPiecePrefabs;
+    [SerializeField] private GameObject BoxPrefab;
+    [SerializeField] private GameObject StonePrefab;
+    [SerializeField] private GameObject VasePrefab;
+
 
     public static PieceGenerator Instance;
     private PieceGenerator() { }
@@ -41,6 +45,9 @@ public class PieceGenerator : MonoBehaviour
             "b" => BluePiecePrefab,
             "y" => YellowPiecePrefab,
             "rand" => coloredPiecePrefabs[Random.Range(0, 4)],
+            "bo" => BoxPrefab,
+            "s" => StonePrefab,
+            "v" => VasePrefab,
             _ => RedPiecePrefab, // TODO: Handle invalid type after implementing all types
         };
 

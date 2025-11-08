@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b1e03da66ac6b44a93c7c4c743f86d7, type: 3}
+  m_Name: VaseData
+  m_EditorClassIdentifier: Assembly-CSharp::VaseData
+  baseSprite: {fileID: -4678962038349899921, guid: a36b343efc22b4204b4e8777a3869c59, type: 3}
+  damagedSprite: {fileID: -1432975368721100300, guid: 2c1bf43a84b39475bb5c4c1c647c46ca, type: 3}
+  explosionSprites:
+  - {fileID: 4095080387558074076, guid: 00d0cbca9d76145d7909ff2bb4767c00, type: 3}
+  - {fileID: 6406247513108631659, guid: b1a03768eeacb4d928651dc730d8cbd2, type: 3}
+  - {fileID: -2350886445216773880, guid: 2d3ee805e22aa40159e74992c057bf65, type: 3}
+  hitPoints: 2

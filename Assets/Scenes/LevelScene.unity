@@ -243,6 +243,7 @@ MonoBehaviour:
   slotPrefab: {fileID: 67607861692756736, guid: 7197ca3b95d7f1e489f1a0c4c9d74829, type: 3}
   slotContainer: {fileID: 1662840775}
   pieceContainer: {fileID: 1786217228}
+  pieceSize: 0
 --- !u!1 &624838758
 GameObject:
   m_ObjectHideFlags: 0
@@ -603,6 +604,9 @@ MonoBehaviour:
   GreenPiecePrefab: {fileID: 647411412973870476, guid: 7a361ad526626a048b07381e78cda43d, type: 3}
   BluePiecePrefab: {fileID: 647411412973870476, guid: 84fc3ae95fefb11439d57ce27b18ca2e, type: 3}
   YellowPiecePrefab: {fileID: 647411412973870476, guid: df2c907b488c5b74d996e6e255fa1939, type: 3}
+  BoxPrefab: {fileID: 647411412973870476, guid: 39190d22315f22f4ba66d910d93d5ab1, type: 3}
+  StonePrefab: {fileID: 647411412973870476, guid: c12e9d39610a16641af36fb738d9dd37, type: 3}
+  VasePrefab: {fileID: 647411412973870476, guid: 14a1798fc97466440bf36eb42e8e6758, type: 3}
 --- !u!4 &1269502890
 Transform:
   m_ObjectHideFlags: 0

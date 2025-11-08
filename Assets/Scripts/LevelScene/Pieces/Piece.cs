@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public abstract class Piece : MonoBehaviour
@@ -8,7 +9,9 @@ public abstract class Piece : MonoBehaviour
 
     public abstract void OnTap();
     public abstract bool OnBreak();
+    public abstract bool OnBreakPowerUp();
     public virtual bool IsFallable() => true;
+    protected abstract IEnumerator Explode();
 
     private float PieceSize => GameBoard.Instance.pieceSize;
     private const float fallSpeedFactor = 3f;

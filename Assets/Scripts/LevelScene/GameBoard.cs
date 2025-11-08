@@ -339,11 +339,31 @@ public class GameBoard : MonoBehaviour
 
             if (matchingPieces.Count < 2) return;
 
+            HashSet<Piece> willBreakPieces = new HashSet<Piece>();
             foreach (ColoredPiece match in matchingPieces)
             {
                 TileSlot matchSlot = grid[match.GridPosition.x, match.GridPosition.y];
                 match.Status = ColoredPieceStatus.Exploding;
                 matchSlot.currentPiece = null;
+
+                List<TileSlot> neighbors = GetAdjacentPiecePositions(matchSlot);
+                foreach (TileSlot neighbor in neighbors)
+                {
+                    if (neighbor.currentPiece != null)
+                    {
+                        willBreakPieces.Add(neighbor.currentPiece);
+                    }
+                }
+            }
+
+            foreach (Piece breakPiece in willBreakPieces)
+            {
+                TileSlot breakSlot = grid[breakPiece.GridPosition.x, breakPiece.GridPosition.y];
+                bool isBroken = breakPiece.OnBreak();
+                if (isBroken)
+                {
+                    breakSlot.currentPiece = null;
+                }
             }
 
             if (matchingPieces.Count >= 4)

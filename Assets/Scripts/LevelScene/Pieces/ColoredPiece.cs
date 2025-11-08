@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class ColoredPiece : Piece
@@ -27,6 +28,12 @@ public class ColoredPiece : Piece
         return false;
     }
 
+    public override bool OnBreakPowerUp()
+    {
+        Status = ColoredPieceStatus.Exploding;
+        return true;
+    }
+
     public override void OnTap()
     {
         GameBoard.Instance.ResolveMatch(GridPosition);
@@ -43,14 +50,15 @@ public class ColoredPiece : Piece
                 sr.sprite = pieceData.rocketSprite;
                 break;
             case ColoredPieceStatus.Exploding:
-                Explode();
+                StartCoroutine(Explode());
                 break;
         }
     }
 
-    private void Explode()
+    protected override IEnumerator Explode()
     {
-        Destroy(this.gameObject);
+        yield return null;
+        Destroy(gameObject);
         // Additional explosion effects will be added here
     }
 }
