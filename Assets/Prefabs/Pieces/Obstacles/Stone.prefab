@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3943174116463513249}
   - component: {fileID: 8959733493736907321}
   - component: {fileID: 6918754620294330052}
-  m_Layer: 5
+  m_Layer: 7
   m_Name: Stone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -105,7 +105,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5307844886881404172}
   - component: {fileID: 785144517779439025}
-  m_Layer: 5
+  m_Layer: 7
   m_Name: PieceVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
