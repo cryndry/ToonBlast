@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36b3f341b4301044cb3084c3a81cff44, type: 3}
+  m_Name: HRocketData
+  m_EditorClassIdentifier: Assembly-CSharp::RocketData
+  baseSprite: {fileID: 1184650260280522132, guid: c8b0aef7ac4e94cd5b2f9f806e7cceec, type: 3}
+  headSprite: {fileID: -4731576832940087401, guid: 60aeec2c3d84d4db88668ee484803ae3, type: 3}
+  tailSprite: {fileID: 8611318781296695245, guid: eef4344dd90f94cec858328f509b29b3, type: 3}

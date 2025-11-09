@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36b3f341b4301044cb3084c3a81cff44, type: 3}
+  m_Name: VRocketData
+  m_EditorClassIdentifier: Assembly-CSharp::RocketData
+  isVertical: 1
+  baseSprite: {fileID: 6449952862585347896, guid: 1da043f7003324eef8ef835647b2dd03, type: 3}
+  headSprite: {fileID: 51141016974189086, guid: 9d2a092d4c8e44650bc6252ed819d3e4, type: 3}
+  tailSprite: {fileID: -4697989437084310921, guid: 8703215a097814dadaaa3b7a34f440e8, type: 3}

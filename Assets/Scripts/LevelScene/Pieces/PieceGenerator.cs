@@ -10,6 +10,8 @@ public class PieceGenerator : MonoBehaviour
     [SerializeField] private GameObject BoxPrefab;
     [SerializeField] private GameObject StonePrefab;
     [SerializeField] private GameObject VasePrefab;
+    [SerializeField] private GameObject VRocketPrefab;
+    [SerializeField] private GameObject HRocketPrefab;
 
 
     public static PieceGenerator Instance;
@@ -48,6 +50,9 @@ public class PieceGenerator : MonoBehaviour
             "bo" => BoxPrefab,
             "s" => StonePrefab,
             "v" => VasePrefab,
+            "vro" => VRocketPrefab,
+            "hro" => HRocketPrefab,
+            "randrocket" => Random.value < 0.5f ? VRocketPrefab : HRocketPrefab,
             _ => RedPiecePrefab, // TODO: Handle invalid type after implementing all types
         };
 

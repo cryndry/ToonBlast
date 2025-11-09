@@ -607,6 +607,8 @@ MonoBehaviour:
   BoxPrefab: {fileID: 647411412973870476, guid: 39190d22315f22f4ba66d910d93d5ab1, type: 3}
   StonePrefab: {fileID: 647411412973870476, guid: c12e9d39610a16641af36fb738d9dd37, type: 3}
   VasePrefab: {fileID: 647411412973870476, guid: 14a1798fc97466440bf36eb42e8e6758, type: 3}
+  VRocketPrefab: {fileID: 647411412973870476, guid: b63a1d03ff6444c40844ded022c13c55, type: 3}
+  HRocketPrefab: {fileID: 647411412973870476, guid: dc7805f6f16be6042ad89331a6d8c193, type: 3}
 --- !u!4 &1269502890
 Transform:
   m_ObjectHideFlags: 0

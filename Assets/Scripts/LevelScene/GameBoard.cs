@@ -142,7 +142,12 @@ public class GameBoard : MonoBehaviour
         }
     }
 
-    private Vector2 GetPositionOfTile(int x, int y)
+    public Vector2Int GetGridSize()
+    {
+        return new Vector2Int(columnCount, rowCount);
+    }
+
+    public Vector2 GetPositionOfTile(int x, int y)
     {
         float posX = startPosition.x + (x + 0.5f) * pieceSize;
         float posY = startPosition.y + (y + 0.5f) * pieceSize;
@@ -157,7 +162,7 @@ public class GameBoard : MonoBehaviour
         return new Vector2Int(x, y);
     }
 
-    private void ShowRocketHints()
+    public void ShowRocketHints()
     {
         for (int x = 0; x < columnCount; x++)
         {
@@ -247,7 +252,7 @@ public class GameBoard : MonoBehaviour
         return neighbors;
     }
 
-    private void UpdateGrid()
+    public void UpdateGrid()
     {
         for (int x = 0; x < columnCount; x++)
         {
@@ -285,14 +290,14 @@ public class GameBoard : MonoBehaviour
             neededFallCount -= willFallQueues[x].Count;
             for (int i = 0; i < neededFallCount; i++)
             {
-                    GameObject queuedPieceGO = PieceGenerator.Instance.GeneratePiece("rand", pieceContainer);
-                    queuedPieceGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
+                GameObject queuedPieceGO = PieceGenerator.Instance.GeneratePiece("rand", pieceContainer);
+                queuedPieceGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
 
-                    Piece queuedPiece = queuedPieceGO.GetComponent<Piece>();
-                    willFallQueues[x].Enqueue(queuedPiece);
+                Piece queuedPiece = queuedPieceGO.GetComponent<Piece>();
+                willFallQueues[x].Enqueue(queuedPiece);
 
-                    Vector3 slotPosition = GetPositionOfTile(x, rowCount + willFallQueues[x].Count - 1);
-                    queuedPieceGO.transform.localPosition = slotPosition;
+                Vector3 slotPosition = GetPositionOfTile(x, rowCount + willFallQueues[x].Count - 1);
+                queuedPieceGO.transform.localPosition = slotPosition;
                 queuedPiece.MoveToPosition(GetPositionOfTile(x, rowCount - neededFallCount + i), extraSpeedFactor: neededFallCount);
             }
         }
@@ -384,7 +389,13 @@ public class GameBoard : MonoBehaviour
 
             if (matchingPieces.Count >= 4)
             {
-                // spawn a rocket
+                GameObject rocketGO = PieceGenerator.Instance.GeneratePiece("randrocket", pieceContainer);
+                rocketGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
+                rocketGO.transform.localPosition = GetPositionOfTile(gridPosition.x, gridPosition.y);
+
+                Rocket rocket = rocketGO.GetComponent<Rocket>();
+                rocket.GridPosition = gridPosition;
+                slot.currentPiece = rocket;
             }
         }
 

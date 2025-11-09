@@ -142,12 +142,12 @@ TextureImporter:
       name: horizontal_rocket_part_right_0
       rect:
         serializedVersion: 2
-        x: 18
-        y: 16
-        width: 116
-        height: 107
+        x: 0
+        y: 0
+        width: 140
+        height: 140
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -164,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: a3436f09b0b1fb04c9dab76979a12fc9
     internalID: 0
     vertices: []
     indices: 
