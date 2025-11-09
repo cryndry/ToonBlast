@@ -13,10 +13,12 @@ public abstract class Piece : MonoBehaviour
     public virtual bool IsFallable() => true;
     protected abstract IEnumerator Explode();
 
-    private float PieceSize => GameBoard.Instance.pieceSize;
+    protected float PieceSize => GameBoard.Instance.pieceSize;
     private const float fallSpeedFactor = 3f;
 
     private Vector3? targetPosition = null;
+    private bool shouldMoveInGrid = true;
+    private float extraSpeedFactor = 1f;
 
     void Start()
     {
@@ -28,13 +30,16 @@ public abstract class Piece : MonoBehaviour
     {
         if (targetPosition != null)
         {
-            float movement = PieceSize * fallSpeedFactor * Time.deltaTime;
+            float movement = PieceSize * fallSpeedFactor * extraSpeedFactor * Time.deltaTime;
             transform.position = Vector3.MoveTowards(transform.position, targetPosition.Value, movement);
 
-            Vector2Int calculatedGridPosition = GameBoard.Instance.GetGridIndexFromPosition(transform.position);
-            if (calculatedGridPosition != GridPosition)
+            if (shouldMoveInGrid)
             {
-                GameBoard.Instance.SetSlotPiece(calculatedGridPosition, this);
+                Vector2Int calculatedGridPosition = GameBoard.Instance.GetGridIndexFromPosition(transform.position);
+                if (calculatedGridPosition != GridPosition)
+                {
+                    GameBoard.Instance.SetSlotPiece(calculatedGridPosition, this);
+                }
             }
 
             if (transform.position == targetPosition.Value)
@@ -57,15 +62,25 @@ public abstract class Piece : MonoBehaviour
         }
     }
 
-    public void MoveToPosition(Vector3 targetPosition)
+    public void MoveToPosition(
+        Vector3 targetPosition,
+        float extraSpeedFactor = 1f, // min of 1, max of 3
+        bool shouldMoveInGrid = true)
     {
         this.targetPosition = targetPosition;
+        this.extraSpeedFactor = Mathf.Clamp(extraSpeedFactor, 1f, 3f);
+        this.shouldMoveInGrid = shouldMoveInGrid;
+    }
+
+    public bool IsMoving()
+    {
+        return targetPosition != null;
     }
 
     private void SetColliderSizeAndOffset()
     {
         // 1. Set the size
-        boxCollider.size = Vector2.one * sr.sprite.bounds.size.x;
+        boxCollider.size = Vector2.one * sr.sprite.bounds.size.x * 0.9f;
 
         // 2. Calculate the bottom position of the sprite in local space
         // bounds.min.y gives you the bottom edge relative to the pivot

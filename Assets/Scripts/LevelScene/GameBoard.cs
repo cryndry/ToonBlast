@@ -251,6 +251,8 @@ public class GameBoard : MonoBehaviour
     {
         for (int x = 0; x < columnCount; x++)
         {
+            int neededFallCount = 0;
+
             for (int y = 0; y < rowCount; y++)
             {
                 TileSlot slot = grid[x, y];
@@ -268,7 +270,7 @@ public class GameBoard : MonoBehaviour
                     {
                         Piece fallingPiece = checkSlot.currentPiece;
                         checkSlot.currentPiece = null;
-                        fallingPiece.MoveToPosition(GetPositionOfTile(x, y));
+                        fallingPiece.MoveToPosition(GetPositionOfTile(x, y), extraSpeedFactor: checkY - y);
                         foundFallingPiece = true;
                         break;
                     }
@@ -276,7 +278,13 @@ public class GameBoard : MonoBehaviour
 
                 if (!foundFallingPiece)
                 {
-                    // Slot is empty and usable, need to fill it, add new piece to fall queue
+                    neededFallCount++;
+                }
+            }
+
+            neededFallCount -= willFallQueues[x].Count;
+            for (int i = 0; i < neededFallCount; i++)
+            {
                     GameObject queuedPieceGO = PieceGenerator.Instance.GeneratePiece("rand", pieceContainer);
                     queuedPieceGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
 
@@ -285,8 +293,7 @@ public class GameBoard : MonoBehaviour
 
                     Vector3 slotPosition = GetPositionOfTile(x, rowCount + willFallQueues[x].Count - 1);
                     queuedPieceGO.transform.localPosition = slotPosition;
-                    queuedPiece.MoveToPosition(GetPositionOfTile(x, y));
-                }
+                queuedPiece.MoveToPosition(GetPositionOfTile(x, rowCount - neededFallCount + i), extraSpeedFactor: neededFallCount);
             }
         }
     }
@@ -304,6 +311,15 @@ public class GameBoard : MonoBehaviour
         {
             // Debug.LogError("Trying to set piece in an unusable slot: " + gridPosition);
             return false;
+        }
+
+        if (piece == null)
+        {
+            TileSlot slotToEmpty = grid[gridPosition.x, gridPosition.y];
+            slotToEmpty.currentPiece = null;
+            UpdateGrid();
+            ShowRocketHints();
+            return true;
         }
 
         TileSlot exSlot = grid[piece.GridPosition.x, piece.GridPosition.y];

@@ -41,6 +41,8 @@ public class ColoredPiece : Piece
 
     private void SetStatus(ColoredPieceStatus status)
     {
+        if (sr == null || pieceData == null) return;
+
         switch (status)
         {
             case ColoredPieceStatus.Normal:
