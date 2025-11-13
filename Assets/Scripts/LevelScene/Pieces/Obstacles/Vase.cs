@@ -15,29 +15,34 @@ public class Vase : Piece
 
     public override bool OnBreak()
     {
-        Damage();
-        return currentHP <= 0;
+        bool isBroken = Damage();
+        return isBroken;
     }
 
     public override bool OnBreakPowerUp()
     {
-        Damage();
-        return currentHP <= 0;
+        bool isBroken = Damage();
+        return isBroken;
     }
 
     public override bool IsFallable() => true;
 
-    private void Damage()
+    private bool Damage()
     {
-        currentHP -= 1;
-        if (currentHP <= 0)
+        currentHP--;
+        bool isBroken = currentHP <= 0;
+
+        if (isBroken)
         {
+            GameBoard.Instance.AddFallCount(GridPosition.x);
             StartCoroutine(Explode());
         }
         else
         {
             sr.sprite = vaseData.damagedSprite;
         }
+
+        return isBroken;
     }
 
     protected override IEnumerator Explode()

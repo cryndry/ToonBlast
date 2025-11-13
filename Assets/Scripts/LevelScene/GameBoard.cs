@@ -26,6 +26,9 @@ public class GameBoard : MonoBehaviour
     private TileSlot[,] grid;
     private string[] gridPieceTypes;
     private Queue<Piece>[] willFallQueues;
+    private int[] neededFallCounts;
+
+    public int activeRocketCount = 0;
 
     private void Awake()
     {
@@ -61,6 +64,7 @@ public class GameBoard : MonoBehaviour
             gridPieceTypes = levelData.grid.ToArray();
             moveCount = levelData.move_count;
 
+            neededFallCounts = new int[columnCount];
             willFallQueues = new Queue<Piece>[columnCount];
             grid = new TileSlot[columnCount, rowCount];
             for (int x = 0; x < columnCount; x++)
@@ -137,6 +141,7 @@ public class GameBoard : MonoBehaviour
                     Piece piece = pieceGO.GetComponent<Piece>();
                     piece.GridPosition = slot.position;
                     slot.currentPiece = piece;
+                    slot.futurePiece = piece;
                 }
             }
         }
@@ -256,8 +261,6 @@ public class GameBoard : MonoBehaviour
     {
         for (int x = 0; x < columnCount; x++)
         {
-            int neededFallCount = 0;
-
             for (int y = 0; y < rowCount; y++)
             {
                 TileSlot slot = grid[x, y];
@@ -266,29 +269,55 @@ public class GameBoard : MonoBehaviour
                 Piece piece = slot.currentPiece;
                 if (piece != null) continue;
 
-                bool foundFallingPiece = false;
                 // Logic to make pieces fall into empty slots
                 for (int checkY = y + 1; checkY < rowCount; checkY++)
                 {
                     TileSlot checkSlot = grid[x, checkY];
-                    if (checkSlot.isUsable && checkSlot.currentPiece != null && checkSlot.currentPiece.IsFallable())
+                    if (checkSlot.isUsable && checkSlot.currentPiece != null)
                     {
-                        Piece fallingPiece = checkSlot.currentPiece;
-                        checkSlot.currentPiece = null;
-                        fallingPiece.MoveToPosition(GetPositionOfTile(x, y), extraSpeedFactor: checkY - y);
-                        foundFallingPiece = true;
+                        if (checkSlot.currentPiece.IsFallable())
+                        {
+                            Piece fallingPiece = checkSlot.currentPiece;
+                            ClearSlotPiece(fallingPiece.GridPosition);
+                            slot.futurePiece = fallingPiece;
+                            fallingPiece.MoveToPosition(GetPositionOfTile(x, y), extraSpeedFactor: checkY - y);
+                        }
+                        else
+                        {
+                            DecreaseFallCount(x);
+                        }
+
                         break;
                     }
                 }
+            }
 
-                if (!foundFallingPiece)
+            int neededFallCount = neededFallCounts[x];
+
+            List<int> slotsWithoutFuturePieceIndices = new List<int>();
+            for (int y = 0; y < rowCount; y++)
+            {
+                TileSlot slot = grid[x, y];
+                if (!slot.isUsable) continue;
+
+                if (slot.currentPiece != null && !slot.currentPiece.IsFallable())
                 {
-                    neededFallCount++;
+                    slotsWithoutFuturePieceIndices.Clear();
+                    continue;
+                }
+
+                if (slot.futurePiece == null)
+                {
+                    slotsWithoutFuturePieceIndices.Add(y);
                 }
             }
 
-            neededFallCount -= willFallQueues[x].Count;
-            for (int i = 0; i < neededFallCount; i++)
+            if (slotsWithoutFuturePieceIndices.Count != 0 || neededFallCount != 0)
+            {
+                Debug.Log($"Column {x}: neededFallCount {neededFallCount} - {slotsWithoutFuturePieceIndices.Count} slotsWithoutFuturePieceIndices.Count");
+            }
+
+            for (int i = 0; i < Mathf.Min(slotsWithoutFuturePieceIndices.Count, neededFallCount); i++)
             {
                 GameObject queuedPieceGO = PieceGenerator.Instance.GeneratePiece("rand", pieceContainer);
                 queuedPieceGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
@@ -296,14 +325,19 @@ public class GameBoard : MonoBehaviour
                 Piece queuedPiece = queuedPieceGO.GetComponent<Piece>();
                 willFallQueues[x].Enqueue(queuedPiece);
 
-                Vector3 slotPosition = GetPositionOfTile(x, rowCount + willFallQueues[x].Count - 1);
-                queuedPieceGO.transform.localPosition = slotPosition;
-                queuedPiece.MoveToPosition(GetPositionOfTile(x, rowCount - neededFallCount + i), extraSpeedFactor: neededFallCount);
+                Vector3 initialPosition = GetPositionOfTile(x, rowCount + willFallQueues[x].Count - 1);
+                queuedPieceGO.transform.localPosition = initialPosition;
+
+                Vector3 queuedPieceTargetPosition = GetPositionOfTile(x, slotsWithoutFuturePieceIndices[i]);
+                queuedPiece.MoveToPosition(queuedPieceTargetPosition, extraSpeedFactor: neededFallCount);
+                grid[x, slotsWithoutFuturePieceIndices[i]].futurePiece = queuedPiece;
+
+                DecreaseFallCount(x);
             }
         }
     }
 
-    public bool SetSlotPiece(Vector2Int gridPosition, Piece piece)
+    private bool IsSlotUsable(Vector2Int gridPosition)
     {
         if (gridPosition.x < 0 || gridPosition.x >= columnCount ||
             gridPosition.y < 0 || gridPosition.y >= rowCount)
@@ -312,25 +346,26 @@ public class GameBoard : MonoBehaviour
             return false;
         }
 
-        if (!grid[gridPosition.x, gridPosition.y].isUsable)
-        {
-            // Debug.LogError("Trying to set piece in an unusable slot: " + gridPosition);
-            return false;
-        }
+        return grid[gridPosition.x, gridPosition.y].isUsable;
+    }
 
-        if (piece == null)
-        {
-            TileSlot slotToEmpty = grid[gridPosition.x, gridPosition.y];
-            slotToEmpty.currentPiece = null;
-            UpdateGrid();
-            ShowRocketHints();
-            return true;
-        }
+    public Piece GetSlotPiece(Vector2Int gridPosition)
+    {
+        bool isSlotUsable = IsSlotUsable(gridPosition);
+        if (!isSlotUsable) return null;
+
+        return grid[gridPosition.x, gridPosition.y].currentPiece;
+    }
+
+    public bool SetSlotPiece(Vector2Int gridPosition, Piece piece)
+    {
+        bool isSlotUsable = IsSlotUsable(gridPosition);
+        if (!isSlotUsable || piece == null) return false;
 
         TileSlot exSlot = grid[piece.GridPosition.x, piece.GridPosition.y];
         if (exSlot.currentPiece == piece)
         {
-            exSlot.currentPiece = null;
+            ClearSlotPiece(exSlot.position);
         }
 
         TileSlot slot = grid[gridPosition.x, gridPosition.y];
@@ -345,6 +380,39 @@ public class GameBoard : MonoBehaviour
         ShowRocketHints();
 
         return true;
+    }
+
+    public void ClearSlotPiece(Vector2Int gridPosition, bool shouldUpdateGrid = false)
+    {
+        bool isSlotUsable = IsSlotUsable(gridPosition);
+        if (!isSlotUsable) return;
+
+        TileSlot slotToEmpty = grid[gridPosition.x, gridPosition.y];
+        if (slotToEmpty.currentPiece == slotToEmpty.futurePiece)
+        {
+            slotToEmpty.futurePiece = null;
+        }
+        slotToEmpty.currentPiece = null;
+
+        if (shouldUpdateGrid)
+        {
+            UpdateGrid();
+            ShowRocketHints();
+        }
+    }
+
+    public void AddFallCount(int columnIndex)
+    {
+        if (columnIndex < 0 || columnIndex >= columnCount) return;
+
+        neededFallCounts[columnIndex]++;
+    }
+
+    public void DecreaseFallCount(int columnIndex, int amount = 1)
+    {
+        if (columnIndex < 0 || columnIndex >= columnCount) return;
+
+        neededFallCounts[columnIndex] -= amount;
     }
 
     public void ResolveMatch(Vector2Int gridPosition)
@@ -365,7 +433,7 @@ public class GameBoard : MonoBehaviour
             {
                 TileSlot matchSlot = grid[match.GridPosition.x, match.GridPosition.y];
                 match.Status = ColoredPieceStatus.Exploding;
-                matchSlot.currentPiece = null;
+                ClearSlotPiece(matchSlot.position);
 
                 List<TileSlot> neighbors = GetAdjacentPiecePositions(matchSlot);
                 foreach (TileSlot neighbor in neighbors)
@@ -379,11 +447,10 @@ public class GameBoard : MonoBehaviour
 
             foreach (Piece breakPiece in willBreakPieces)
             {
-                TileSlot breakSlot = grid[breakPiece.GridPosition.x, breakPiece.GridPosition.y];
                 bool isBroken = breakPiece.OnBreak();
                 if (isBroken)
                 {
-                    breakSlot.currentPiece = null;
+                    HandlePieceBroken(breakPiece);
                 }
             }
 
@@ -396,10 +463,33 @@ public class GameBoard : MonoBehaviour
                 Rocket rocket = rocketGO.GetComponent<Rocket>();
                 rocket.GridPosition = gridPosition;
                 slot.currentPiece = rocket;
+                slot.futurePiece = rocket;
+
+                DecreaseFallCount(gridPosition.x);
             }
         }
 
         UpdateGrid();
         ShowRocketHints();
+    }
+
+    public void HandlePieceBroken(Piece piece)
+    {
+        int x = piece.GridPosition.x;
+        int y = piece.GridPosition.y;
+
+        ClearSlotPiece(piece.GridPosition);
+
+        if (!piece.IsFallable())
+        {
+            while (--y >= 0)
+            {
+                TileSlot belowSlot = grid[x, y];
+                if (belowSlot.isUsable && belowSlot.currentPiece == null)
+                {
+                    AddFallCount(x);
+                }
+            }
+        }
     }
 }
