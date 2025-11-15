@@ -111,7 +111,6 @@ public class Rocket : Piece
 
     private void OnGridPositionChangedCallbackForRocketPart(Vector2Int newGridPosition)
     {
-        Debug.Log("Rocket part affecting position: " + newGridPosition);
         var piece = GameBoard.Instance.GetSlotPiece(newGridPosition);
         if (piece != null)
         {

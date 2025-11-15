@@ -140,8 +140,9 @@ public class GameBoard : MonoBehaviour
 
                     Piece piece = pieceGO.GetComponent<Piece>();
                     piece.GridPosition = slot.position;
+                    piece.FutureGridPosition = slot.position;
                     slot.currentPiece = piece;
-                    slot.futurePiece = piece;
+                    slot.isReserved = true;
                 }
             }
         }
@@ -264,7 +265,7 @@ public class GameBoard : MonoBehaviour
             for (int y = 0; y < rowCount; y++)
             {
                 TileSlot slot = grid[x, y];
-                if (!slot.isUsable) continue;
+                if (!slot.isUsable || slot.isReserved) continue;
 
                 Piece piece = slot.currentPiece;
                 if (piece != null) continue;
@@ -279,7 +280,8 @@ public class GameBoard : MonoBehaviour
                         {
                             Piece fallingPiece = checkSlot.currentPiece;
                             ClearSlotPiece(fallingPiece.GridPosition);
-                            slot.futurePiece = fallingPiece;
+                            slot.isReserved = true;
+                            fallingPiece.FutureGridPosition = slot.position;
                             fallingPiece.MoveToPosition(GetPositionOfTile(x, y), extraSpeedFactor: checkY - y);
                         }
                         else
@@ -306,15 +308,10 @@ public class GameBoard : MonoBehaviour
                     continue;
                 }
 
-                if (slot.futurePiece == null)
+                if (!slot.isReserved)
                 {
                     slotsWithoutFuturePieceIndices.Add(y);
                 }
-            }
-
-            if (slotsWithoutFuturePieceIndices.Count != 0 || neededFallCount != 0)
-            {
-                Debug.Log($"Column {x}: neededFallCount {neededFallCount} - {slotsWithoutFuturePieceIndices.Count} slotsWithoutFuturePieceIndices.Count");
             }
 
             for (int i = 0; i < Mathf.Min(slotsWithoutFuturePieceIndices.Count, neededFallCount); i++)
@@ -328,10 +325,13 @@ public class GameBoard : MonoBehaviour
                 Vector3 initialPosition = GetPositionOfTile(x, rowCount + willFallQueues[x].Count - 1);
                 queuedPieceGO.transform.localPosition = initialPosition;
 
-                Vector3 queuedPieceTargetPosition = GetPositionOfTile(x, slotsWithoutFuturePieceIndices[i]);
+                Vector2Int queuedPieceTargetGridPosition = new Vector2Int(x, slotsWithoutFuturePieceIndices[i]);
+                Vector3 queuedPieceTargetPosition = GetPositionOfTile(queuedPieceTargetGridPosition.x, queuedPieceTargetGridPosition.y);
                 queuedPiece.MoveToPosition(queuedPieceTargetPosition, extraSpeedFactor: neededFallCount);
-                grid[x, slotsWithoutFuturePieceIndices[i]].futurePiece = queuedPiece;
 
+                grid[queuedPieceTargetGridPosition.x, queuedPieceTargetGridPosition.y].isReserved = true;
+                queuedPiece.FutureGridPosition = queuedPieceTargetGridPosition;
+                
                 DecreaseFallCount(x);
             }
         }
@@ -382,23 +382,15 @@ public class GameBoard : MonoBehaviour
         return true;
     }
 
-    public void ClearSlotPiece(Vector2Int gridPosition, bool shouldUpdateGrid = false)
+    public void ClearSlotPiece(Vector2Int gridPosition)
     {
         bool isSlotUsable = IsSlotUsable(gridPosition);
         if (!isSlotUsable) return;
 
         TileSlot slotToEmpty = grid[gridPosition.x, gridPosition.y];
-        if (slotToEmpty.currentPiece == slotToEmpty.futurePiece)
-        {
-            slotToEmpty.futurePiece = null;
-        }
-        slotToEmpty.currentPiece = null;
 
-        if (shouldUpdateGrid)
-        {
-            UpdateGrid();
-            ShowRocketHints();
-        }
+        slotToEmpty.currentPiece = null;
+        slotToEmpty.isReserved = false;
     }
 
     public void AddFallCount(int columnIndex)
@@ -412,7 +404,7 @@ public class GameBoard : MonoBehaviour
     {
         if (columnIndex < 0 || columnIndex >= columnCount) return;
 
-        neededFallCounts[columnIndex] -= amount;
+        neededFallCounts[columnIndex] = Mathf.Max(0, neededFallCounts[columnIndex] - amount);
     }
 
     public void ResolveMatch(Vector2Int gridPosition)
@@ -462,15 +454,19 @@ public class GameBoard : MonoBehaviour
 
                 Rocket rocket = rocketGO.GetComponent<Rocket>();
                 rocket.GridPosition = gridPosition;
+                rocket.FutureGridPosition = gridPosition;
                 slot.currentPiece = rocket;
-                slot.futurePiece = rocket;
+                slot.isReserved = true;
 
                 DecreaseFallCount(gridPosition.x);
             }
         }
 
-        UpdateGrid();
-        ShowRocketHints();
+        if (activeRocketCount <= 0)
+        {
+            UpdateGrid();
+            ShowRocketHints();
+        }
     }
 
     public void HandlePieceBroken(Piece piece)

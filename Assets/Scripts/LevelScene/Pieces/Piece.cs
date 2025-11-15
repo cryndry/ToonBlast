@@ -4,6 +4,7 @@ using UnityEngine;
 public abstract class Piece : MonoBehaviour
 {
     public Vector2Int GridPosition { get; set; }
+    public Vector2Int FutureGridPosition { get; set; }
     [SerializeField] protected SpriteRenderer sr;
     [SerializeField] protected BoxCollider2D boxCollider;
 
