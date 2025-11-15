@@ -276,7 +276,7 @@ public class GameBoard : MonoBehaviour
                         if (checkSlot.currentPiece.IsFallable())
                         {
                             Piece fallingPiece = checkSlot.currentPiece;
-                            ClearSlotPiece(fallingPiece.GridPosition);
+                            ClearSlotPiece(checkSlot.position);
                             slot.isReserved = true;
                             fallingPiece.MoveToPosition(GetPositionOfTile(x, y), extraSpeedFactor: checkY - y);
                         }
@@ -346,14 +346,9 @@ public class GameBoard : MonoBehaviour
 
     public bool SetSlotPiece(Vector2Int gridPosition, Piece piece)
     {
-        bool isSlotUsable = IsSlotUsable(gridPosition);
-        if (!isSlotUsable || piece == null) return false;
+        if (piece == null) return false;
 
-        TileSlot exSlot = grid[piece.GridPosition.x, piece.GridPosition.y];
-        if (exSlot.currentPiece == piece)
-        {
-            ClearSlotPiece(exSlot.position);
-        }
+        if (!IsSlotUsable(gridPosition)) return false;
 
         TileSlot slot = grid[gridPosition.x, gridPosition.y];
         slot.currentPiece = piece;
@@ -371,8 +366,7 @@ public class GameBoard : MonoBehaviour
 
     public void ClearSlotPiece(Vector2Int gridPosition)
     {
-        bool isSlotUsable = IsSlotUsable(gridPosition);
-        if (!isSlotUsable) return;
+        if (!IsSlotUsable(gridPosition)) return;
 
         TileSlot slotToEmpty = grid[gridPosition.x, gridPosition.y];
 
