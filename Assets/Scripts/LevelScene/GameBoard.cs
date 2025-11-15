@@ -138,7 +138,6 @@ public class GameBoard : MonoBehaviour
 
                     Piece piece = pieceGO.GetComponent<Piece>();
                     piece.GridPosition = slot.position;
-                    piece.FutureGridPosition = slot.position;
                     slot.currentPiece = piece;
                     slot.isReserved = true;
                 }
@@ -279,7 +278,6 @@ public class GameBoard : MonoBehaviour
                             Piece fallingPiece = checkSlot.currentPiece;
                             ClearSlotPiece(fallingPiece.GridPosition);
                             slot.isReserved = true;
-                            fallingPiece.FutureGridPosition = slot.position;
                             fallingPiece.MoveToPosition(GetPositionOfTile(x, y), extraSpeedFactor: checkY - y);
                         }
 
@@ -322,7 +320,6 @@ public class GameBoard : MonoBehaviour
                 queuedPiece.MoveToPosition(queuedPieceTargetPosition, extraSpeedFactor: slotsWithoutFuturePieceIndices.Count);
 
                 grid[queuedPieceTargetGridPosition.x, queuedPieceTargetGridPosition.y].isReserved = true;
-                queuedPiece.FutureGridPosition = queuedPieceTargetGridPosition;
             }
         }
     }
@@ -430,7 +427,6 @@ public class GameBoard : MonoBehaviour
 
                 Rocket rocket = rocketGO.GetComponent<Rocket>();
                 rocket.GridPosition = gridPosition;
-                rocket.FutureGridPosition = gridPosition;
                 slot.currentPiece = rocket;
                 slot.isReserved = true;
             }

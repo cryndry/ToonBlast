@@ -4,7 +4,6 @@ using UnityEngine;
 public abstract class Piece : MonoBehaviour
 {
     public Vector2Int GridPosition { get; set; }
-    public Vector2Int FutureGridPosition { get; set; }
     [SerializeField] protected SpriteRenderer sr;
     [SerializeField] protected BoxCollider2D boxCollider;
 
@@ -61,7 +60,7 @@ public abstract class Piece : MonoBehaviour
             transform.position = Vector3.MoveTowards(transform.position, targetPosition.Value, movement);
 
             Vector2Int calculatedGridPosition = GameBoard.Instance.GetGridIndexFromPosition(transform.position);
-            
+
             if (calculatedGridPosition != GridPosition)
             {
                 GridPosition = calculatedGridPosition;
