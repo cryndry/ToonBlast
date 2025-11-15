@@ -59,7 +59,6 @@ public class ColoredPiece : Piece
                 sr.sprite = pieceData.rocketSprite;
                 break;
             case ColoredPieceStatus.Exploding:
-                GameBoard.Instance.AddFallCount(GridPosition.x);
                 StartCoroutine(Explode());
                 break;
         }

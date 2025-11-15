@@ -14,7 +14,6 @@ public class Stone : Piece
 
     public override bool OnBreakPowerUp()
     {
-        GameBoard.Instance.AddFallCount(GridPosition.x);
         StartCoroutine(Explode());
         return true;
     }

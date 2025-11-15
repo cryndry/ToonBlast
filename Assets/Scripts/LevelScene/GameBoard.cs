@@ -26,7 +26,6 @@ public class GameBoard : MonoBehaviour
     private TileSlot[,] grid;
     private string[] gridPieceTypes;
     private Queue<Piece>[] willFallQueues;
-    private int[] neededFallCounts;
 
     public int activeRocketCount = 0;
 
@@ -64,7 +63,6 @@ public class GameBoard : MonoBehaviour
             gridPieceTypes = levelData.grid.ToArray();
             moveCount = levelData.move_count;
 
-            neededFallCounts = new int[columnCount];
             willFallQueues = new Queue<Piece>[columnCount];
             grid = new TileSlot[columnCount, rowCount];
             for (int x = 0; x < columnCount; x++)
@@ -284,17 +282,11 @@ public class GameBoard : MonoBehaviour
                             fallingPiece.FutureGridPosition = slot.position;
                             fallingPiece.MoveToPosition(GetPositionOfTile(x, y), extraSpeedFactor: checkY - y);
                         }
-                        else
-                        {
-                            DecreaseFallCount(x);
-                        }
 
                         break;
                     }
                 }
             }
-
-            int neededFallCount = neededFallCounts[x];
 
             List<int> slotsWithoutFuturePieceIndices = new List<int>();
             for (int y = 0; y < rowCount; y++)
@@ -314,7 +306,7 @@ public class GameBoard : MonoBehaviour
                 }
             }
 
-            for (int i = 0; i < Mathf.Min(slotsWithoutFuturePieceIndices.Count, neededFallCount); i++)
+            for (int i = 0; i < slotsWithoutFuturePieceIndices.Count; i++)
             {
                 GameObject queuedPieceGO = PieceGenerator.Instance.GeneratePiece("rand", pieceContainer);
                 queuedPieceGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
@@ -327,12 +319,10 @@ public class GameBoard : MonoBehaviour
 
                 Vector2Int queuedPieceTargetGridPosition = new Vector2Int(x, slotsWithoutFuturePieceIndices[i]);
                 Vector3 queuedPieceTargetPosition = GetPositionOfTile(queuedPieceTargetGridPosition.x, queuedPieceTargetGridPosition.y);
-                queuedPiece.MoveToPosition(queuedPieceTargetPosition, extraSpeedFactor: neededFallCount);
+                queuedPiece.MoveToPosition(queuedPieceTargetPosition, extraSpeedFactor: slotsWithoutFuturePieceIndices.Count);
 
                 grid[queuedPieceTargetGridPosition.x, queuedPieceTargetGridPosition.y].isReserved = true;
                 queuedPiece.FutureGridPosition = queuedPieceTargetGridPosition;
-                
-                DecreaseFallCount(x);
             }
         }
     }
@@ -393,20 +383,6 @@ public class GameBoard : MonoBehaviour
         slotToEmpty.isReserved = false;
     }
 
-    public void AddFallCount(int columnIndex)
-    {
-        if (columnIndex < 0 || columnIndex >= columnCount) return;
-
-        neededFallCounts[columnIndex]++;
-    }
-
-    public void DecreaseFallCount(int columnIndex, int amount = 1)
-    {
-        if (columnIndex < 0 || columnIndex >= columnCount) return;
-
-        neededFallCounts[columnIndex] = Mathf.Max(0, neededFallCounts[columnIndex] - amount);
-    }
-
     public void ResolveMatch(Vector2Int gridPosition)
     {
         TileSlot slot = grid[gridPosition.x, gridPosition.y];
@@ -442,7 +418,7 @@ public class GameBoard : MonoBehaviour
                 bool isBroken = breakPiece.OnBreak();
                 if (isBroken)
                 {
-                    HandlePieceBroken(breakPiece);
+                    ClearSlotPiece(breakPiece.GridPosition);
                 }
             }
 
@@ -457,8 +433,6 @@ public class GameBoard : MonoBehaviour
                 rocket.FutureGridPosition = gridPosition;
                 slot.currentPiece = rocket;
                 slot.isReserved = true;
-
-                DecreaseFallCount(gridPosition.x);
             }
         }
 
@@ -466,26 +440,6 @@ public class GameBoard : MonoBehaviour
         {
             UpdateGrid();
             ShowRocketHints();
-        }
-    }
-
-    public void HandlePieceBroken(Piece piece)
-    {
-        int x = piece.GridPosition.x;
-        int y = piece.GridPosition.y;
-
-        ClearSlotPiece(piece.GridPosition);
-
-        if (!piece.IsFallable())
-        {
-            while (--y >= 0)
-            {
-                TileSlot belowSlot = grid[x, y];
-                if (belowSlot.isUsable && belowSlot.currentPiece == null)
-                {
-                    AddFallCount(x);
-                }
-            }
         }
     }
 }

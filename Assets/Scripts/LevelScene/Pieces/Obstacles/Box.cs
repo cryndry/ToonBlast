@@ -9,14 +9,12 @@ public class Box : Piece
 
     public override bool OnBreak()
     {
-        GameBoard.Instance.AddFallCount(GridPosition.x);
         StartCoroutine(Explode());
         return true;
     }
 
     public override bool OnBreakPowerUp()
     {
-        GameBoard.Instance.AddFallCount(GridPosition.x);
         StartCoroutine(Explode());
         return true;
     }

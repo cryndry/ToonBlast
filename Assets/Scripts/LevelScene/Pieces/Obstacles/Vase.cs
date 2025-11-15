@@ -34,7 +34,6 @@ public class Vase : Piece
 
         if (isBroken)
         {
-            GameBoard.Instance.AddFallCount(GridPosition.x);
             StartCoroutine(Explode());
         }
         else

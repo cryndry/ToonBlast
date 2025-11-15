@@ -52,7 +52,6 @@ public class Rocket : Piece
         sr.sprite = null;
         OnGridPositionChanged -= OnGridPositionChangedCallback;
 
-        GameBoard.Instance.AddFallCount(GridPosition.x);
         GameBoard.Instance.ClearSlotPiece(GridPosition);
         GameBoard.Instance.activeRocketCount++;
 
@@ -117,7 +116,7 @@ public class Rocket : Piece
             bool isBroken = piece.OnBreakPowerUp();
             if (isBroken)
             {
-                GameBoard.Instance.HandlePieceBroken(piece);
+                GameBoard.Instance.ClearSlotPiece(newGridPosition);
             }
         }
     }
