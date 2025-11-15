@@ -9,11 +9,6 @@ public class Rocket : Piece
     public bool isInteractable = true;
 
 
-    private void Awake()
-    {
-        OnGridPositionChanged += OnGridPositionChangedCallback;
-    }
-
     public override bool OnBreak()
     {
         return false;
@@ -101,11 +96,6 @@ public class Rocket : Piece
 
         rocketPart.OnGridPositionChanged -= rocketPart.OnGridPositionChangedCallbackForRocketPart;
         Destroy(rocketPartGO);
-    }
-
-    private void OnGridPositionChangedCallback(Vector2Int newGridPosition)
-    {
-        GameBoard.Instance.SetSlotPiece(newGridPosition, this);
     }
 
     private void OnGridPositionChangedCallbackForRocketPart(Vector2Int newGridPosition)

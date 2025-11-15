@@ -21,13 +21,6 @@ public class ColoredPiece : Piece
     private void Awake()
     {
         SetStatus(ColoredPieceStatus.Normal);
-        OnGridPositionChanged += OnGridPositionChangedCallback;
-    }
-
-    protected override void OnDestroy()
-    {
-        base.OnDestroy();
-        OnGridPositionChanged -= OnGridPositionChangedCallback;
     }
 
     public override bool OnBreak()
@@ -69,10 +62,5 @@ public class ColoredPiece : Piece
         yield return null;
         Destroy(gameObject);
         // Additional explosion effects will be added here
-    }
-
-    private void OnGridPositionChangedCallback(Vector2Int newGridPosition)
-    {
-        GameBoard.Instance.SetSlotPiece(newGridPosition, this);
     }
 }

@@ -13,8 +13,8 @@ public abstract class Piece : MonoBehaviour
     public virtual bool IsFallable() => true;
     protected abstract IEnumerator Explode();
 
-    public event PieceEventHandler OnGridPositionChanged;
-    public delegate void PieceEventHandler(Vector2Int newGridPosition);
+    protected event PieceEventHandler OnGridPositionChanged;
+    protected delegate void PieceEventHandler(Vector2Int newGridPosition);
 
     protected float PieceSize => GameBoard.Instance.pieceSize;
     private const float fallSpeedFactor = 3f;
@@ -22,20 +22,22 @@ public abstract class Piece : MonoBehaviour
     private Vector3? targetPosition = null;
     private float extraSpeedFactor = 1f;
 
-    void Start()
+    private void Start()
     {
         SetColliderSizeAndOffset();
         EventManager.OnTapEvent += HandleTap;
+        OnGridPositionChanged += OnGridPositionChangedCallback;
     }
 
-    void Update()
+    private void Update()
     {
         Move();
     }
 
-    protected virtual void OnDestroy()
+    private void OnDestroy()
     {
         EventManager.OnTapEvent -= HandleTap;
+        OnGridPositionChanged -= OnGridPositionChangedCallback;
     }
 
     private void HandleTap(Collider2D tappedCollider)
@@ -89,5 +91,10 @@ public abstract class Piece : MonoBehaviour
 
         boxCollider.size = sr.sprite.bounds.size.x * 0.9f * Vector2.one;
         boxCollider.offset = new Vector2(targetCenterX, targetCenterY);
+    }
+
+    protected void OnGridPositionChangedCallback(Vector2Int newGridPosition)
+    {
+        GameBoard.Instance.SetSlotPiece(newGridPosition, this);
     }
 }
