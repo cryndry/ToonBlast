@@ -22,7 +22,7 @@ public abstract class Piece : MonoBehaviour
     private Vector3? targetPosition = null;
     private float extraSpeedFactor = 1f;
 
-    private void Start()
+    protected virtual void Awake()
     {
         SetColliderSizeAndOffset();
         EventManager.OnTapEvent += HandleTap;

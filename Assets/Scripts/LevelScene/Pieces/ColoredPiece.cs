@@ -18,8 +18,9 @@ public class ColoredPiece : Piece
     }
 
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         SetStatus(ColoredPieceStatus.Normal);
     }
 

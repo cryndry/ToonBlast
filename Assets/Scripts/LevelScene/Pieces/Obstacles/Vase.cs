@@ -6,8 +6,9 @@ public class Vase : Piece
     [SerializeField] private VaseData vaseData;
     private int currentHP;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         currentHP = vaseData.hitPoints;
     }
 
