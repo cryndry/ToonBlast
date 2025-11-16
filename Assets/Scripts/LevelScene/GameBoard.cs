@@ -12,7 +12,6 @@ public class GameBoard : LazySingleton<GameBoard>
     private int level;
     private int columnCount = 10;
     private int rowCount = 10;
-    private int moveCount = 20;
 
     public float pieceSize;
     private const float maxPieceSize = 1f;
@@ -25,6 +24,16 @@ public class GameBoard : LazySingleton<GameBoard>
     private Queue<Piece>[] willFallQueues;
 
     public int activeRocketCount = 0;
+    public bool IsInteractable
+    {
+        get
+        {
+            return (
+                activeRocketCount == 0
+                && MoveCountManager.Instance.Moves > 0
+            );
+        }
+    }
 
     private void Start()
     {
@@ -48,7 +57,7 @@ public class GameBoard : LazySingleton<GameBoard>
             columnCount = levelData.grid_width;
             rowCount = levelData.grid_height;
             gridPieceTypes = levelData.grid.ToArray();
-            moveCount = levelData.move_count;
+            MoveCountManager.Instance.Moves = levelData.move_count;
 
             willFallQueues = new Queue<Piece>[columnCount];
             grid = new TileSlot[columnCount, rowCount];
@@ -130,6 +139,8 @@ public class GameBoard : LazySingleton<GameBoard>
                 }
             }
         }
+
+        gridPieceTypes = null;
     }
 
     public Vector2Int GetGridSize()
@@ -308,6 +319,11 @@ public class GameBoard : LazySingleton<GameBoard>
 
                 grid[queuedPieceTargetGridPosition.x, queuedPieceTargetGridPosition.y].isReserved = true;
             }
+        }
+
+        if (MoveCountManager.Instance.Moves <= 0)
+        {
+            Debug.Log("No more moves left! Game Over.");
         }
     }
 

@@ -42,8 +42,9 @@ public abstract class Piece : MonoBehaviour
 
     private void HandleTap(Collider2D tappedCollider)
     {
-        if (tappedCollider != null && tappedCollider.gameObject == this.gameObject)
+        if (tappedCollider != null && tappedCollider.gameObject == this.gameObject && GameBoard.Instance.IsInteractable)
         {
+            MoveCountManager.Instance.Moves--;
             OnTap();
         }
     }
