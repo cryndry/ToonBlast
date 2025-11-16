@@ -1,25 +1,12 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class InputManager : MonoBehaviour
+public class InputManager : LazySingleton<InputManager>
 {
-    private InputManager() { }
-    public static InputManager Instance { get; private set; }
-
     private InputSystemActions inputSystemActions;
-
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            // If another instance already exists,
-            // destroy this new one and stop.
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
         DontDestroyOnLoad(gameObject);
 
         inputSystemActions = new InputSystemActions();

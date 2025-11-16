@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PieceGenerator : MonoBehaviour
+public class PieceGenerator : LazySingleton<PieceGenerator>
 {
     [SerializeField] private GameObject RedPiecePrefab;
     [SerializeField] private GameObject GreenPiecePrefab;
@@ -13,22 +13,8 @@ public class PieceGenerator : MonoBehaviour
     [SerializeField] private GameObject VRocketPrefab;
     [SerializeField] private GameObject HRocketPrefab;
 
-
-    public static PieceGenerator Instance;
-    private PieceGenerator() { }
-
-
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-
         coloredPiecePrefabs = new GameObject[]
         {
             RedPiecePrefab,

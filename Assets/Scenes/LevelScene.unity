@@ -244,6 +244,7 @@ MonoBehaviour:
   slotContainer: {fileID: 1662840775}
   pieceContainer: {fileID: 1786217228}
   pieceSize: 0
+  activeRocketCount: 0
 --- !u!1 &624838758
 GameObject:
   m_ObjectHideFlags: 0

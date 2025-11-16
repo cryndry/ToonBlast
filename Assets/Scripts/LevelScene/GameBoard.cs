@@ -3,11 +3,8 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameBoard : MonoBehaviour
+public class GameBoard : LazySingleton<GameBoard>
 {
-    private GameBoard() { }
-    public static GameBoard Instance { get; private set; }
-
     [SerializeField] private GameObject slotPrefab;
     [SerializeField] private Transform slotContainer;
     [SerializeField] private Transform pieceContainer;
@@ -28,16 +25,6 @@ public class GameBoard : MonoBehaviour
     private Queue<Piece>[] willFallQueues;
 
     public int activeRocketCount = 0;
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-    }
 
     private void Start()
     {
