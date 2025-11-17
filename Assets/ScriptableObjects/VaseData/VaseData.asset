@@ -19,3 +19,4 @@ MonoBehaviour:
   - {fileID: 6406247513108631659, guid: b1a03768eeacb4d928651dc730d8cbd2, type: 3}
   - {fileID: -2350886445216773880, guid: 2d3ee805e22aa40159e74992c057bf65, type: 3}
   hitPoints: 2
+  goalType: 2
