@@ -30,7 +30,7 @@ public class GameBoard : LazySingleton<GameBoard>
         {
             return (
                 activeRocketCount == 0
-                && MoveCountManager.Instance.Moves > 0
+                && MoveCountManager.Instance.HasMovesLeft()
             );
         }
     }
@@ -57,7 +57,7 @@ public class GameBoard : LazySingleton<GameBoard>
             columnCount = levelData.grid_width;
             rowCount = levelData.grid_height;
             gridPieceTypes = levelData.grid.ToArray();
-            MoveCountManager.Instance.Moves = levelData.move_count;
+            MoveCountManager.Instance.SetInitialMoves(levelData.move_count);
 
             willFallQueues = new Queue<Piece>[columnCount];
             grid = new TileSlot[columnCount, rowCount];
@@ -321,9 +321,9 @@ public class GameBoard : LazySingleton<GameBoard>
             }
         }
 
-        if (MoveCountManager.Instance.Moves <= 0)
+        if (!MoveCountManager.Instance.HasMovesLeft())
         {
-            Debug.Log("No more moves left! Game Over.");
+            EventManager.InvokeMovesExhausted();
         }
     }
 

@@ -9,4 +9,18 @@ public static class EventManager
     {
         OnTapEvent?.Invoke(tappedCollider);
     }
+
+    public static event Action<int> OnMoveCountChanged;
+
+    public static void InvokeMoveCountChanged(int newMoveCount)
+    {
+        OnMoveCountChanged?.Invoke(newMoveCount);
+    }
+
+    public static event Action OnMovesExhausted;
+
+    public static void InvokeMovesExhausted()
+    {
+        OnMovesExhausted?.Invoke();
+    }
 }
