@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public static class EventManager
@@ -17,10 +18,17 @@ public static class EventManager
         OnMoveCountChanged?.Invoke(newMoveCount);
     }
 
-    public static event Action OnMovesExhausted;
+    public static event Action<Dictionary<GoalType, int>> OnGoalsUpdated;
 
-    public static void InvokeMovesExhausted()
+    public static void InvokeGoalsUpdated(Dictionary<GoalType, int> currentGoals)
     {
-        OnMovesExhausted?.Invoke();
+        OnGoalsUpdated?.Invoke(currentGoals);
+    }
+
+    public static event Action<bool> OnLevelCompleted;
+
+    public static void InvokeLevelCompleted(bool success)
+    {
+        OnLevelCompleted?.Invoke(success);
     }
 }

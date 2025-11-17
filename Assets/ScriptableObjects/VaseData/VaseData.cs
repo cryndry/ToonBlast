@@ -7,4 +7,5 @@ public class VaseData : ScriptableObject
     public Sprite damagedSprite;
     public Sprite[] explosionSprites;
     public int hitPoints;
+    public GoalType goalType;
 }

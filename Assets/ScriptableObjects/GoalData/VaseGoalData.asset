@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d7778c24ed4ed4b84154dcc6ee6c8c, type: 3}
+  m_Name: VaseGoalData
+  m_EditorClassIdentifier: Assembly-CSharp::GoalData
+  goalType: 2
+  goalSprite: {fileID: -4678962038349899921, guid: a36b343efc22b4204b4e8777a3869c59, type: 3}

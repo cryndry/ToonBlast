@@ -31,6 +31,7 @@ public class GameBoard : LazySingleton<GameBoard>
             return (
                 activeRocketCount == 0
                 && MoveCountManager.Instance.HasMovesLeft()
+                && !GoalManager.Instance.AreGoalsCompleted()
             );
         }
     }
@@ -321,9 +322,13 @@ public class GameBoard : LazySingleton<GameBoard>
             }
         }
 
-        if (!MoveCountManager.Instance.HasMovesLeft())
+        if (GoalManager.Instance.AreGoalsCompleted())
         {
-            EventManager.InvokeMovesExhausted();
+            EventManager.InvokeLevelCompleted(true);
+        }
+        else if (!MoveCountManager.Instance.HasMovesLeft())
+        {
+            EventManager.InvokeLevelCompleted(false);
         }
     }
 

@@ -10,6 +10,7 @@ public class Vase : Piece
     {
         base.Awake();
         currentHP = vaseData.hitPoints;
+        GoalManager.Instance.IncreaseGoalOfType(vaseData.goalType);
     }
 
     public override void OnTap() { }
@@ -35,6 +36,7 @@ public class Vase : Piece
 
         if (isBroken)
         {
+            GoalManager.Instance.DecreaseGoalOfType(vaseData.goalType);
             StartCoroutine(Explode());
         }
         else

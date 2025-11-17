@@ -5,6 +5,12 @@ public class Stone : Piece
 {
     [SerializeField] private StoneData stoneData;
 
+    protected override void Awake()
+    {
+        base.Awake();
+        GoalManager.Instance.IncreaseGoalOfType(stoneData.goalType);
+    }
+
     public override void OnTap() { }
 
     public override bool OnBreak()
@@ -14,6 +20,7 @@ public class Stone : Piece
 
     public override bool OnBreakPowerUp()
     {
+        GoalManager.Instance.DecreaseGoalOfType(stoneData.goalType);
         StartCoroutine(Explode());
         return true;
     }

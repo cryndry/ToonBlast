@@ -5,4 +5,5 @@ public class StoneData : ScriptableObject
 {
     public Sprite baseSprite;
     public Sprite[] explosionSprites;
+    public GoalType goalType;
 }
