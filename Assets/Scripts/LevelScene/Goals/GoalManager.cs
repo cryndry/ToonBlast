@@ -19,12 +19,6 @@ public class GoalManager : LazySingleton<GoalManager>
         }
     }
 
-    public void InitializeGoals(Dictionary<GoalType, int> goals)
-    {
-        currentGoals = new Dictionary<GoalType, int>(goals);
-        EventManager.InvokeGoalsUpdated(currentGoals);
-    }
-
     public void IncreaseGoalOfType(GoalType type)
     {
         currentGoals[type] = currentGoals.GetValueOrDefault(type, 0) + 1;
@@ -36,15 +30,30 @@ public class GoalManager : LazySingleton<GoalManager>
         if (currentGoals.ContainsKey(type))
         {
             currentGoals[type]--;
+            if (currentGoals[type] <= 0)
+            {
+                currentGoals.Remove(type);
+            }
             EventManager.InvokeGoalsUpdated(currentGoals);
         }
+    }
+
+    public GoalData GetGoalDataOfType(GoalType type)
+    {
+        if (goalDataDict.TryGetValue(type, out GoalData goalData))
+        {
+            return goalData;
+        }
+
+        return null;
     }
 
     public bool AreGoalsCompleted()
     {
         foreach (var goal in currentGoals)
         {
-            if (goal.Value > 0){
+            if (goal.Value > 0)
+            {
                 return false;
             }
         }
