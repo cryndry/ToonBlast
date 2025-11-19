@@ -37,7 +37,8 @@ public class GoalsUI : MonoBehaviour
     {
         
         // Clean up old UI items that are no longer goals
-        foreach (GoalType uiGoalType in goalItemUIs.Keys)
+        List<GoalType> goalItemUITypes = new List<GoalType>(goalItemUIs.Keys);
+        foreach (GoalType uiGoalType in goalItemUITypes)
         {
             if (!currentGoals.ContainsKey(uiGoalType))
             {
