@@ -31,4 +31,11 @@ public static class EventManager
     {
         OnLevelCompleted?.Invoke(success);
     }
+
+    public static event Action<bool> OnLevelResultUIFinished;
+
+    public static void InvokeLevelResultUIFinished(bool success)
+    {
+        OnLevelResultUIFinished?.Invoke(success);
+    }
 }
