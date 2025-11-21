@@ -382,18 +382,18 @@ public class GameBoard : LazySingleton<GameBoard>
         slotToEmpty.isReserved = false;
     }
 
-    public void ResolveMatch(Vector2Int gridPosition)
+    public void ResolveColoredPieceMatch(ColoredPiece coloredPiece)
     {
+        if (coloredPiece == null) return;
+
+        Vector2Int gridPosition = coloredPiece.GridPosition;
+   
         TileSlot slot = grid[gridPosition.x, gridPosition.y];
-        Piece piece = slot.currentPiece;
-
-        if (piece == null) return;
-
-        if (piece is ColoredPiece)
-        {
             List<ColoredPiece> matchingPieces = FindMatchingColoredPieces(slot);
 
             if (matchingPieces.Count < 2) return;
+
+        MoveCountManager.Instance.UseMove();
 
             HashSet<Piece> willBreakPieces = new HashSet<Piece>();
             foreach (ColoredPiece match in matchingPieces)
@@ -433,7 +433,6 @@ public class GameBoard : LazySingleton<GameBoard>
                 slot.isReserved = true;
 
                 SetSlotPiece(gridPosition, rocket);
-            }
         }
 
         if (activeRocketCount <= 0)

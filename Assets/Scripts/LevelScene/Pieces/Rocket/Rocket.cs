@@ -25,7 +25,8 @@ public class Rocket : Piece
     public override void OnTap()
     {
         if (!isInteractable) return;
-
+        
+        MoveCountManager.Instance.UseMove();
         StartCoroutine(ActivateRocket());
     }
 

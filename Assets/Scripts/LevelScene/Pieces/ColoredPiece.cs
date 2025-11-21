@@ -37,7 +37,7 @@ public class ColoredPiece : Piece
 
     public override void OnTap()
     {
-        GameBoard.Instance.ResolveMatch(GridPosition);
+        GameBoard.Instance.ResolveColoredPieceMatch(this);
     }
 
     private void SetStatus(ColoredPieceStatus status)

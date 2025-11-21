@@ -44,7 +44,6 @@ public abstract class Piece : MonoBehaviour
     {
         if (tappedCollider != null && tappedCollider.gameObject == this.gameObject && GameBoard.Instance.IsInteractable)
         {
-            MoveCountManager.Instance.UseMove();
             OnTap();
         }
     }
