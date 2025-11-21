@@ -158,8 +158,8 @@ public class GameBoard : LazySingleton<GameBoard>
 
     public Vector2Int GetGridIndexFromPosition(Vector2 worldPos)
     {
-        int x = Mathf.FloorToInt((worldPos.x - startPosition.x) / pieceSize - 0.5f);
-        int y = Mathf.FloorToInt((worldPos.y - startPosition.y) / pieceSize - 0.5f);
+        int x = Mathf.RoundToInt((worldPos.x - startPosition.x) / pieceSize - 0.5f);
+        int y = Mathf.RoundToInt((worldPos.y - startPosition.y) / pieceSize - 0.5f);
 
         return new Vector2Int(x, y);
     }
@@ -431,6 +431,8 @@ public class GameBoard : LazySingleton<GameBoard>
                 rocket.GridPosition = gridPosition;
                 slot.currentPiece = rocket;
                 slot.isReserved = true;
+
+                SetSlotPiece(gridPosition, rocket);
             }
         }
 
