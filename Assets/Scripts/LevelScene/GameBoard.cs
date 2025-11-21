@@ -219,7 +219,7 @@ public class GameBoard : LazySingleton<GameBoard>
             {
                 group.Add(coloredPiece);
 
-                foreach (TileSlot neighbor in GetAdjacentPiecePositions(current))
+                foreach (TileSlot neighbor in GetAdjacentSlots(current))
                 {
                     if (!visited.Contains(neighbor))
                     {
@@ -233,25 +233,38 @@ public class GameBoard : LazySingleton<GameBoard>
         return group;
     }
 
-    private List<TileSlot> GetAdjacentPiecePositions(TileSlot slot, bool includeDiagonals = false)
+    private List<TileSlot> GetAdjacentSlots(TileSlot slot, bool includeDiagonals = false)
     {
         List<TileSlot> neighbors = new List<TileSlot>();
         Vector2Int piecePosition = slot.position;
 
-        if (piecePosition.x > 0) neighbors.Add(grid[piecePosition.x - 1, piecePosition.y]);
-        if (piecePosition.x < columnCount - 1) neighbors.Add(grid[piecePosition.x + 1, piecePosition.y]);
-        if (piecePosition.y > 0) neighbors.Add(grid[piecePosition.x, piecePosition.y - 1]);
-        if (piecePosition.y < rowCount - 1) neighbors.Add(grid[piecePosition.x, piecePosition.y + 1]);
-
-        if (includeDiagonals)
+        List<Vector2Int> adjacentPositions = GetAdjacentPositions(piecePosition, includeDiagonals, validateBounds: true);
+        foreach (Vector2Int pos in adjacentPositions)
         {
-            if (piecePosition.x > 0 && piecePosition.y > 0) neighbors.Add(grid[piecePosition.x - 1, piecePosition.y - 1]);
-            if (piecePosition.x > 0 && piecePosition.y < rowCount - 1) neighbors.Add(grid[piecePosition.x - 1, piecePosition.y + 1]);
-            if (piecePosition.x < columnCount - 1 && piecePosition.y > 0) neighbors.Add(grid[piecePosition.x + 1, piecePosition.y - 1]);
-            if (piecePosition.x < columnCount - 1 && piecePosition.y < rowCount - 1) neighbors.Add(grid[piecePosition.x + 1, piecePosition.y + 1]);
+            neighbors.Add(grid[pos.x, pos.y]);
         }
 
         return neighbors;
+    }
+
+    private List<Vector2Int> GetAdjacentPositions(Vector2Int position, bool includeDiagonals = false, bool validateBounds = true)
+    {
+        List<Vector2Int> positions = new List<Vector2Int>();
+
+        if (!validateBounds || position.x > 0) positions.Add(new Vector2Int(position.x - 1, position.y));
+        if (!validateBounds || position.x < columnCount - 1) positions.Add(new Vector2Int(position.x + 1, position.y));
+        if (!validateBounds || position.y > 0) positions.Add(new Vector2Int(position.x, position.y - 1));
+        if (!validateBounds || position.y < rowCount - 1) positions.Add(new Vector2Int(position.x, position.y + 1));
+
+        if (includeDiagonals)
+        {
+            if (!validateBounds || (position.x > 0 && position.y > 0)) positions.Add(new Vector2Int(position.x - 1, position.y - 1));
+            if (!validateBounds || (position.x > 0 && position.y < rowCount - 1)) positions.Add(new Vector2Int(position.x - 1, position.y + 1));
+            if (!validateBounds || (position.x < columnCount - 1 && position.y > 0)) positions.Add(new Vector2Int(position.x + 1, position.y - 1));
+            if (!validateBounds || (position.x < columnCount - 1 && position.y < rowCount - 1)) positions.Add(new Vector2Int(position.x + 1, position.y + 1));
+        }
+
+        return positions;
     }
 
     public void UpdateGrid()
@@ -380,7 +393,7 @@ public class GameBoard : LazySingleton<GameBoard>
         if (coloredPiece == null) return;
 
         Vector2Int gridPosition = coloredPiece.GridPosition;
-   
+
         TileSlot slot = grid[gridPosition.x, gridPosition.y];
         List<ColoredPiece> matchingPieces = FindMatchingColoredPieces(slot);
 
@@ -395,7 +408,7 @@ public class GameBoard : LazySingleton<GameBoard>
             match.Status = ColoredPieceStatus.Exploding;
             ClearSlotPiece(matchSlot.position);
 
-            List<TileSlot> neighbors = GetAdjacentPiecePositions(matchSlot);
+            List<TileSlot> neighbors = GetAdjacentSlots(matchSlot);
             foreach (TileSlot neighbor in neighbors)
             {
                 if (neighbor.currentPiece != null)
@@ -433,5 +446,89 @@ public class GameBoard : LazySingleton<GameBoard>
             UpdateGrid();
             ShowRocketHints();
         }
+    }
+
+    public void ResolveRocketTap(Rocket rocket)
+    {
+        if (rocket == null) return;
+
+        Vector2Int gridPosition = rocket.GridPosition;
+        TileSlot slot = grid[gridPosition.x, gridPosition.y];
+
+        bool isAnyNeighborRocket = false;
+        List<TileSlot> neighbors = GetAdjacentSlots(slot);
+        foreach (TileSlot neighbor in neighbors)
+        {
+            if (neighbor.currentPiece is Rocket neighborRocket)
+            {
+                isAnyNeighborRocket = true;
+                break;
+            }
+        }
+
+        MoveCountManager.Instance.UseMove();
+
+        if (isAnyNeighborRocket)
+        {
+            neighbors.Add(slot); // include self
+            foreach (TileSlot neighbor in neighbors)
+            {
+                Piece neighborPiece = neighbor.currentPiece;
+
+                if (neighborPiece is Rocket neighborRocket)
+                {
+                    Destroy(neighborRocket.gameObject);
+                    ClearSlotPiece(neighbor.position);
+                }
+                else if (neighborPiece != null)
+                {
+                    bool isBroken = neighborPiece.OnBreakPowerUp();
+                    if (isBroken)
+                    {
+                        ClearSlotPiece(neighbor.position);
+                    }
+                }
+            }
+            neighbors.Clear();
+
+            List<Vector2Int> adjacentPositions = GetAdjacentPositions(gridPosition, validateBounds: false);
+            adjacentPositions.Add(gridPosition); // include self
+            foreach (Vector2Int adjacentPosition in adjacentPositions)
+            {
+                // Generate combo rockets
+                if (adjacentPosition.x == gridPosition.x)
+                {
+                    Rocket comboRocket = GenerateRocket("hro", adjacentPosition);
+                    comboRocket.OnBreakPowerUp();
+                }
+                if (adjacentPosition.y == gridPosition.y)
+                {
+                    Rocket comboRocket = GenerateRocket("vro", adjacentPosition);
+                    comboRocket.OnBreakPowerUp();
+                }
+            }
+        }
+        else
+        {
+            rocket.OnBreakPowerUp();
+        }
+    }
+
+    private Rocket GenerateRocket(string rocketType, Vector2Int gridPosition)
+    {
+        if (rocketType != "vro" && rocketType != "hro" && rocketType != "randrocket")
+        {
+            Debug.LogError("Invalid rocket type: " + rocketType);
+            return null;
+        }
+
+        GameObject rocketGO = PieceGenerator.Instance.GeneratePiece(rocketType, pieceContainer);
+        rocketGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
+        rocketGO.transform.localPosition = GetPositionOfTile(gridPosition.x, gridPosition.y);
+
+        Rocket rocket = rocketGO.GetComponent<Rocket>();
+        rocket.GridPosition = gridPosition;
+
+        return rocket;
     }
 }

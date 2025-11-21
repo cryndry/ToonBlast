@@ -4,6 +4,8 @@ using UnityEngine;
 public class Rocket : Piece
 {
     [SerializeField] private RocketData rocketData;
+    [SerializeField] private ParticleSystem smokeTrail;
+    [SerializeField] private ParticleSystem starTrail;
 
     public bool isActivated = false;
     public bool isInteractable = true;
@@ -26,8 +28,7 @@ public class Rocket : Piece
     {
         if (!isInteractable) return;
         
-        MoveCountManager.Instance.UseMove();
-        StartCoroutine(ActivateRocket());
+        GameBoard.Instance.ResolveRocketTap(this);
     }
 
     protected override IEnumerator Explode()
@@ -92,6 +93,9 @@ public class Rocket : Piece
         Vector2 targetWorldPosition = GameBoard.Instance.GetPositionOfTile(targetGridPosition.x, targetGridPosition.y);
 
         rocketPart.MoveToPosition(targetWorldPosition, extraSpeedFactor: 3f);
+
+        rocketPart.smokeTrail.gameObject.SetActive(true);
+        rocketPart.starTrail.gameObject.SetActive(true);
 
         yield return new WaitWhile(rocketPart.IsMoving);
 
