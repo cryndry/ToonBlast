@@ -17,6 +17,9 @@ public class ColoredPiece : Piece
         }
     }
 
+    private const int maxParticleCount = 8;
+    private int finishedParticleCount = 0;
+
 
     protected override void Awake()
     {
@@ -60,8 +63,28 @@ public class ColoredPiece : Piece
 
     protected override IEnumerator Explode()
     {
-        yield return null;
+        sr.sprite = null;
+
+        Vector3 spread = transform.localScale * 0.5f;
+        Vector3 particleScale = transform.localScale * 0.3f;
+
+        for (int i = 0; i < maxParticleCount; i++)
+        {
+            PieceGenerator.Instance.GeneratePiece("particle", transform)
+                .GetComponent<Particle>()
+                .Initialize(
+                    particleScale,
+                    pieceData.explosionSprite
+                ).Animate(
+                    Random.insideUnitCircle.normalized * spread,
+                    0.5f,
+                    () => finishedParticleCount++
+                );
+        }
+
+        while (finishedParticleCount < maxParticleCount)
+            yield return null;
+
         Destroy(gameObject);
-        // Additional explosion effects will be added here
     }
 }
