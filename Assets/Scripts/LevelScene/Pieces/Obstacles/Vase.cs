@@ -5,6 +5,8 @@ public class Vase : Piece
 {
     [SerializeField] private VaseData vaseData;
     private int currentHP;
+    private int finishedParticleCount = 0;
+
 
     protected override void Awake()
     {
@@ -49,8 +51,29 @@ public class Vase : Piece
 
     protected override IEnumerator Explode()
     {
-        yield return null;
+        sr.sprite = null;
+
+        Vector3 spread = transform.localScale * 0.5f;
+        Vector3 particleScale = transform.localScale * 0.6f;
+
+        foreach (Sprite explosionSprite in vaseData.explosionSprites)
+        {
+            PieceGenerator.Instance.GeneratePiece("particle", transform)
+                .GetComponent<Particle>()
+                .Initialize(
+                    particleScale,
+                    explosionSprite,
+                    Quaternion.Euler(0, 0, Random.Range(0f, 360f))
+                ).Animate(
+                    Random.insideUnitCircle.normalized * spread,
+                    0.7f,
+                    () => finishedParticleCount++
+                );
+        }
+
+        while (finishedParticleCount < vaseData.explosionSprites.Length)
+            yield return null;
+
         Destroy(gameObject);
-        // Additional explosion effects will be added here
     }
 }

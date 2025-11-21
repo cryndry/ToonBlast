@@ -9,10 +9,12 @@ public class Particle : MonoBehaviour
 
     public Particle Initialize(
         Vector3 scale,
-        Sprite sprite)
+        Sprite sprite,
+        Quaternion? rotation = null)
     {
         transform.localPosition = Vector3.zero;
         transform.localScale = scale;
+        transform.localRotation = rotation ?? Quaternion.identity;
 
         sr.sprite = sprite;
         return this;
