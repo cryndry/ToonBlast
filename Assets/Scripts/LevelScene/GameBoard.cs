@@ -322,14 +322,7 @@ public class GameBoard : LazySingleton<GameBoard>
             }
         }
 
-        if (GoalManager.Instance.AreGoalsCompleted())
-        {
-            EventManager.InvokeLevelCompleted(true);
-        }
-        else if (!MoveCountManager.Instance.HasMovesLeft())
-        {
-            EventManager.InvokeLevelCompleted(false);
-        }
+        EventManager.InvokeCheckLevelCompletion();
     }
 
     private bool IsSlotUsable(Vector2Int gridPosition)
@@ -389,50 +382,50 @@ public class GameBoard : LazySingleton<GameBoard>
         Vector2Int gridPosition = coloredPiece.GridPosition;
    
         TileSlot slot = grid[gridPosition.x, gridPosition.y];
-            List<ColoredPiece> matchingPieces = FindMatchingColoredPieces(slot);
+        List<ColoredPiece> matchingPieces = FindMatchingColoredPieces(slot);
 
-            if (matchingPieces.Count < 2) return;
+        if (matchingPieces.Count < 2) return;
 
         MoveCountManager.Instance.UseMove();
 
-            HashSet<Piece> willBreakPieces = new HashSet<Piece>();
-            foreach (ColoredPiece match in matchingPieces)
-            {
-                TileSlot matchSlot = grid[match.GridPosition.x, match.GridPosition.y];
-                match.Status = ColoredPieceStatus.Exploding;
-                ClearSlotPiece(matchSlot.position);
+        HashSet<Piece> willBreakPieces = new HashSet<Piece>();
+        foreach (ColoredPiece match in matchingPieces)
+        {
+            TileSlot matchSlot = grid[match.GridPosition.x, match.GridPosition.y];
+            match.Status = ColoredPieceStatus.Exploding;
+            ClearSlotPiece(matchSlot.position);
 
-                List<TileSlot> neighbors = GetAdjacentPiecePositions(matchSlot);
-                foreach (TileSlot neighbor in neighbors)
+            List<TileSlot> neighbors = GetAdjacentPiecePositions(matchSlot);
+            foreach (TileSlot neighbor in neighbors)
+            {
+                if (neighbor.currentPiece != null)
                 {
-                    if (neighbor.currentPiece != null)
-                    {
-                        willBreakPieces.Add(neighbor.currentPiece);
-                    }
+                    willBreakPieces.Add(neighbor.currentPiece);
                 }
             }
+        }
 
-            foreach (Piece breakPiece in willBreakPieces)
+        foreach (Piece breakPiece in willBreakPieces)
+        {
+            bool isBroken = breakPiece.OnBreak();
+            if (isBroken)
             {
-                bool isBroken = breakPiece.OnBreak();
-                if (isBroken)
-                {
-                    ClearSlotPiece(breakPiece.GridPosition);
-                }
+                ClearSlotPiece(breakPiece.GridPosition);
             }
+        }
 
-            if (matchingPieces.Count >= 4)
-            {
-                GameObject rocketGO = PieceGenerator.Instance.GeneratePiece("randrocket", pieceContainer);
-                rocketGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
-                rocketGO.transform.localPosition = GetPositionOfTile(gridPosition.x, gridPosition.y);
+        if (matchingPieces.Count >= 4)
+        {
+            GameObject rocketGO = PieceGenerator.Instance.GeneratePiece("randrocket", pieceContainer);
+            rocketGO.transform.localScale = pieceSize * pieceSizePPUScaler * Vector3.one;
+            rocketGO.transform.localPosition = GetPositionOfTile(gridPosition.x, gridPosition.y);
 
-                Rocket rocket = rocketGO.GetComponent<Rocket>();
-                rocket.GridPosition = gridPosition;
-                slot.currentPiece = rocket;
-                slot.isReserved = true;
+            Rocket rocket = rocketGO.GetComponent<Rocket>();
+            rocket.GridPosition = gridPosition;
+            slot.currentPiece = rocket;
+            slot.isReserved = true;
 
-                SetSlotPiece(gridPosition, rocket);
+            SetSlotPiece(gridPosition, rocket);
         }
 
         if (activeRocketCount <= 0)

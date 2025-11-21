@@ -10,13 +10,27 @@ public class LevelResultManager : LazySingleton<LevelResultManager>
     private void OnEnable()
     {
         EventManager.OnLevelCompleted += HandleLevelCompleted;
+        EventManager.OnCheckLevelCompletion += CheckLevelCompletion;
         EventManager.OnLevelResultUIFinished += HandleLevelResultUIFinished;
     }
 
     private void OnDisable()
     {
         EventManager.OnLevelCompleted -= HandleLevelCompleted;
+        EventManager.OnCheckLevelCompletion -= CheckLevelCompletion;
         EventManager.OnLevelResultUIFinished -= HandleLevelResultUIFinished;
+    }
+
+    public void CheckLevelCompletion()
+    {
+        if (GoalManager.Instance.AreGoalsCompleted())
+        {
+            EventManager.InvokeLevelCompleted(true);
+        }
+        else if (!MoveCountManager.Instance.HasMovesLeft())
+        {
+            EventManager.InvokeLevelCompleted(false);
+        }
     }
 
     private void HandleLevelCompleted(bool isWin)

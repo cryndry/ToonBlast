@@ -32,6 +32,13 @@ public static class EventManager
         OnLevelCompleted?.Invoke(success);
     }
 
+    public static event Action OnCheckLevelCompletion;
+
+    public static void InvokeCheckLevelCompletion()
+    {
+        OnCheckLevelCompletion?.Invoke();
+    }
+
     public static event Action<bool> OnLevelResultUIFinished;
 
     public static void InvokeLevelResultUIFinished(bool success)
