@@ -12,6 +12,7 @@ public class PieceGenerator : LazySingleton<PieceGenerator>
     [SerializeField] private GameObject VasePrefab;
     [SerializeField] private GameObject VRocketPrefab;
     [SerializeField] private GameObject HRocketPrefab;
+    [SerializeField] private GameObject ParticlePrefab;
 
     private void Awake()
     {
@@ -39,6 +40,7 @@ public class PieceGenerator : LazySingleton<PieceGenerator>
             "vro" => VRocketPrefab,
             "hro" => HRocketPrefab,
             "randrocket" => Random.value < 0.5f ? VRocketPrefab : HRocketPrefab,
+            "particle" => ParticlePrefab,
             _ => RedPiecePrefab, // TODO: Handle invalid type after implementing all types
         };
 

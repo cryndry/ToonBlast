@@ -1349,6 +1349,7 @@ MonoBehaviour:
   VasePrefab: {fileID: 647411412973870476, guid: 14a1798fc97466440bf36eb42e8e6758, type: 3}
   VRocketPrefab: {fileID: 647411412973870476, guid: b63a1d03ff6444c40844ded022c13c55, type: 3}
   HRocketPrefab: {fileID: 647411412973870476, guid: dc7805f6f16be6042ad89331a6d8c193, type: 3}
+  ParticlePrefab: {fileID: 4139710656525691357, guid: 797c9bdcff883b5429a249c58311c85e, type: 3}
 --- !u!4 &1269502890
 Transform:
   m_ObjectHideFlags: 0
